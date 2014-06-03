@@ -1,26 +1,131 @@
-function sudoku(){
-  var sudokuArray = [];
+var sudokuArray = [];
+var columnArray = [[],[],[],[],[],[],[],[],[]];
+var missingElements = [];
 
-  for(i=1;i<10;++i){
-    var ausgabe = "ausgabe" + i;
-    var randomArray = findRandomArray();
-    sudokuArray.push(randomArray);
-    document.getElementById(ausgabe).innerHTML = randomArray;
+
+  function makeSudokuArray(){
+    for(var i=1;i<10;++i){
+      var ausgabe = "ausgabe" + i;
+      var randomArray = findRandomArray();
+      sudokuArray.push(randomArray);
+      document.getElementById(ausgabe).innerHTML = randomArray;
+    }
   }
 
-  var row1 = sudokuArray[0];
-  var row2 = sudokuArray[1];
-  var row3 = sudokuArray[2];
-  var row4 = sudokuArray[3];
-  var row5 = sudokuArray[4];
-  var row6 = sudokuArray[5];
-  var row7 = sudokuArray[6];
-  var row8 = sudokuArray[7];
-  var row9 = sudokuArray[8];
+  function manageNumberChange(){
+    var counter = 0;
+    for(var l=0;l<columnArray.length;++l){
+      //alert(l);
+      //alert("column array:" + columnArray[l]);
+      var innerArray = columnArray[l];
+      var firstCheck = checkAgainstNine(innerArray);
+      missingElements.push(firstCheck);
+      //alert("firstCheck: " + firstCheck);
+      counter += firstCheck.length;
+      
+    }
+    //alert("Counter: " + counter);
+    if(counter>20){
+      manageComputation();
+    }
+    else {
+      var column = columnArray[0];
+      var doubledElements = getUniqueOrDouble(column, doubled=1);
+      alert("doubled: " + doubledElements);
+      //alert("missing: " + missingElements[0]);
+      for(var i=0;i<column.length;++i){
+        var doubler = column[i];
+        var element = doubledElements[0];
+        if(doubler == element){
+          findChangeElement(i);
+        }
+      }
+    }
+    
+  }
+ 
+function findChangeElement(i){
+  var row = sudokuArray[i];
+  //alert("row: " + row);
+  var firstMissing = missingElements[0][0];
+  alert("firstmissing: " + firstMissing);
+  var firstElement = row[0];
+  for(var j=0;j<row.length;++j){
+    var rowElement = row[j];
+    //alert("rowelement: " + rowElement);
+    if(rowElement == firstMissing){
+      alert("splicing!");
+      row.splice(j, 1, firstElement);
+      row.splice(0, 1 , rowElement);
+      
+    }
+  }
+  //alert(row);
+  document.getElementById("ausgabe" + (i+1)).innerHTML = row;
+}
 
 
+//   function makeComparison(){
+//     for(var i=0;i<sudokuArray.length;++i){
+//       var testRow = sudokuArray[i];
+      
+//       for(var j=i+1;j<sudokuArray.length;++j){
+//         var changeRow = sudokuArray[j];
+//         var changedArray = compareArrays(testRow, changeRow);
+//         sudokuArray.splice(j, 1, changedArray);
+//         var ausgabe = "ausgabe" + (j+1);
+//         document.getElementById(ausgabe).innerHTML = changedArray;
+//       }
+//     }
+//   }
+
+// function compareArrays(array1, array2){
+//     for(var i=0;i<array1.length;++i){
+//       var check1 = array1[i];
+//       var check2 = array2[i];
+//       if(check1 === check2){
+//         array2.splice(i, 2, array2[i+1], array2[i]);
+//       }
+//     }
+//     return array2;
+//   }
+
+
+  function checkAgainstNine(array){
+    var checkArray = [];
+    
+    for(var i=1; i<10; ++i){
+    var marker = 0;
+      for(var j=0;j<array.length; ++j){
+        var check = array[j];
+        if(i!=check){
+          marker += 1;
+        }
+        else{
+          marker -= 1;
+        }
+      }
+      if(marker == 9){
+        checkArray.push(i);
+      }
+    }
+    return checkArray;
+  }
+
+  function getUniqueOrDouble(array, doubled) {
+    var hash = {}, uniqueChoices = [], doubleChoices = [];
+    for ( var i = 0; i < array.length; ++i ) {
+        if ( !hash.hasOwnProperty(array[i]) ) { 
+            hash[ array[i] ] = true;
+            uniqueChoices.push(array[i]);
+        }
+        else {doubleChoices.push(array[i]);}
+    }
+    if(doubled){return doubleChoices;}
+    else{return uniqueChoices;}
+  }
   
-
+  
   function findRandomArray(){
     var array = [1,2,3,4,5,6,7,8,9];
     var newArray = [];
@@ -28,76 +133,42 @@ function sudoku(){
       var arrayIndex = Math.floor(Math.random() * array.length);
       var arrayElement = array[arrayIndex];
       newArray.push(arrayElement);
+      
       array.splice(arrayIndex, 1);
     }
     return newArray;
   }
 
-  function compareArrays(array1, array2){
-    for(i=0;i<array1.length;++i){
-      var check1 = array1[i];
-      var check2 = array2[i];
-      if(check1 === check2){
-        array2.splice(i, 2, array2[i+1], array2[i]);
+  function getColumns(){
+    for(var i=0;i<sudokuArray.length;++i){
+      var getColumnArray = sudokuArray[i];
+      pushColumns(getColumnArray);
+    }
+  }
+
+
+  function pushColumns(getColumnArray){
+    for(var j=0; j<getColumnArray.length; ++j){
+      var columnElement = getColumnArray[j];
+      for(k=0;k<9;++k){
+        if(j==k){
+          columnArray[k].push(columnElement);
+        }
       }
     }
   }
 
-};
-
-
- // var originalArray = [1,2,3,4,5,6,7,8,9];
-  // var array1 = [
-  //           [1,2,3],
-  //           [4,5,6],
-  //           [7,8,9]
-  //          ];
-  // var arrayFirstRow = [];
-  // var arraySecondRow = [];
-  // var arrayThirdRow = [];
-
-  // var arrayFirstColumn = [];
-  // var arraySecondColumn = [];
-  // var arrayThirdColumn = [];
-
-// arrayFirstRow.push(randomArray[0], randomArray[1], randomArray[2]);
-  // arraySecondRow.push(randomArray[3], randomArray[4], randomArray[5]);
-  // arrayThirdRow.push(randomArray[6], randomArray[7], randomArray[8]);
-
-  // document.getElementById("ausgabe1").innerHTML = arrayFirst;
-  // document.getElementById("ausgabe2").innerHTML = arraySecond;
-  // document.getElementById("ausgabe3").innerHTML = arrayThird;
-
-
-// rows1 = [[5,2,7],[3,1,4],[6,9,8]];
-// rows2 = [[5,7,4],[3,8,2],[1,9,6]];
-// columns1 = [[5,3,6],[2,1,9],[7,4,8]];
-// columns2 = [[5,3,1],[7,8,9],[4,2,6]];
+  
+function manageComputation(){
+  sudokuArray = [];
+  columnArray = [[],[],[],[],[],[],[],[],[]];
+  missingElements = [];
+  makeSudokuArray();
+  getColumns();
+  manageNumberChange();
+}
 
 
 
-// function firstFillIn(columnRow){
-  //   var originalArray = [1,2,3,4,5,6,7,8,9];
-  //   for(i=0;i<originalArray.length;++i){
-  //     var element = originalArray[i];
-      
-  //   }
-  // }
 
-  // function getColumnRow(row, column) {
-  //   var columnRow = [];
-  //   columnRow.push(row[0], row[1], row[2]);
-  //   columnRow.push(column[0], column[1], column[2]);
-  //   return columnRow;
-  // }
 
-  // function getUnique(columnRow) {
-  //   var hash = {}, unique = [];
-  //   for ( var i = 0; i < columnRow.length; ++i ) {
-  //       if ( !hash.hasOwnProperty(columnRow[i]) ) { 
-  //           hash[ columnRow[i] ] = true;
-  //           unique.push(columnRow[i]);
-  //       }
-  //   }
-  //   return unique;
-  // }
