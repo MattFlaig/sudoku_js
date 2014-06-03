@@ -13,39 +13,64 @@ var missingElements = [];
   }
 
   function manageNumberChange(){
-    var counter = 0;
-    for(var l=0;l<columnArray.length;++l){
-      //alert(l);
-      //alert("column array:" + columnArray[l]);
-      var innerArray = columnArray[l];
-      var firstCheck = checkAgainstNine(innerArray);
-      missingElements.push(firstCheck);
-      //alert("firstCheck: " + firstCheck);
-      counter += firstCheck.length;
-      
-    }
-    //alert("Counter: " + counter);
-    if(counter>20){
+    
+    var countMissing = getMissingElements();
+    
+    
+    if(countMissing>20){
       manageComputation();
     }
-    else {
-      var column = columnArray[0];
-      var doubledElements = getUniqueOrDouble(column, doubled=1);
-      alert("doubled: " + doubledElements);
-      //alert("missing: " + missingElements[0]);
-      for(var i=0;i<column.length;++i){
-        var doubler = column[i];
-        var element = doubledElements[0];
-        if(doubler == element){
-          findChangeElement(i);
-        }
-      }
+    else {alert("Counter: " + countMissing);
+      getNeighborChange();
+      var stillMissing = getMissingElements();
+      
+      alert(stillMissing);
+  
     }
     
   }
+function getMissingElements(){
+var counter = 0;
+missingElements = [];
+  for(var l=0;l<columnArray.length;++l){
+    //alert(l);
+    //alert("column array:" + columnArray[l]);
+    var innerArray = columnArray[l];
+    var firstCheck = checkAgainstNine(innerArray);
+    missingElements.push(firstCheck);
+    //alert("firstCheck: " + firstCheck);
+    counter += firstCheck.length;
+    
+  }
+  return counter;
+}
+
+function getNeighborChange(){
+for(var m=0; m<columnArray.length;++m){
+  var column = columnArray[m];
+  var doubledElements = getUniqueOrDouble(column, doubled=1);
+  //alert("doubled: " + doubledElements);
+    //alert("missing: " + missingElements[0]);
+    for(var n=0;n<column.length;++n){
+      var doubler = column[n];
+      var element = doubledElements[0];
+      if(doubler == element){
+        //alert("splicing");
+        var row = sudokuArray[n];
+        if(m==8){
+          row.splice(0,9,row[m],row[m-7],row[m-6],row[m-5],row[m-4],row[m-3],row[m-2],row[m-1],row[m-8]);
+        }
+        else{row.splice(m,2,row[m+1],row[m]);}
+        
+        document.getElementById("ausgabe" + (n+1)).innerHTML = row;
+        //findChangeElement(n);
+      }
+    }doubledElements.splice(0,1);
+  }
+}
  
-function findChangeElement(i){
-  var row = sudokuArray[i];
+function findChangeElement(n){
+  var row = sudokuArray[n];
   //alert("row: " + row);
   var firstMissing = missingElements[0][0];
   alert("firstmissing: " + firstMissing);
