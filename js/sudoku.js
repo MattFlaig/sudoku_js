@@ -1,94 +1,134 @@
 var sudokuArray = [];
 var columnArray = [[],[],[],[],[],[],[],[],[]];
 var missingElements = [];
+var doubledElements = [];
 
 
   function makeSudokuArray(){
+    sudokuArray = [];
     for(var i=1;i<10;++i){
       var ausgabe = "ausgabe" + i;
       var randomArray = findRandomArray();
       sudokuArray.push(randomArray);
-      document.getElementById(ausgabe).innerHTML = randomArray;
+      loadView(ausgabe, randomArray);
     }
+  }
+
+  function loadView(ausgabe, array){
+    document.getElementById(ausgabe).innerHTML = array;
   }
 
   function manageNumberChange(){
-    var counter = 0;
-    for(var l=0;l<columnArray.length;++l){
-      //alert(l);
-      //alert("column array:" + columnArray[l]);
-      var innerArray = columnArray[l];
-      var firstCheck = checkAgainstNine(innerArray);
-      missingElements.push(firstCheck);
-      //alert("firstCheck: " + firstCheck);
-      counter += firstCheck.length;
-      
-    }
-    //alert("Counter: " + counter);
-    if(counter>20){
+    
+    var countMissing = getMissingElements();
+    if(countMissing>20){
       manageComputation();
     }
     else {
-      var column = columnArray[0];
-      var doubledElements = getUniqueOrDouble(column, doubled=1);
-      alert("doubled: " + doubledElements);
-      //alert("missing: " + missingElements[0]);
-      for(var i=0;i<column.length;++i){
-        var doubler = column[i];
-        var element = doubledElements[0];
-        if(doubler == element){
-          findChangeElement(i);
-        }
-      }
+      //alert("Counter: " + countMissing);
+      getNeighborChange(p=0);
     }
     
+    
   }
- 
-function findChangeElement(i){
-  var row = sudokuArray[i];
-  //alert("row: " + row);
-  var firstMissing = missingElements[0][0];
-  alert("firstmissing: " + firstMissing);
-  var firstElement = row[0];
-  for(var j=0;j<row.length;++j){
-    var rowElement = row[j];
-    //alert("rowelement: " + rowElement);
-    if(rowElement == firstMissing){
-      alert("splicing!");
-      row.splice(j, 1, firstElement);
-      row.splice(0, 1 , rowElement);
-      
-    }
+
+
+
+function getMissingElements(){
+var counter = 0;
+missingElements = [];
+  for(var l=0;l<columnArray.length;++l){
+    
+    var innerArray = columnArray[l];
+    var firstCheck = checkAgainstNine(innerArray);
+    missingElements.push(firstCheck);
+    //alert("firstCheck: " + firstCheck);
+    counter += firstCheck.length;
+    
   }
-  //alert(row);
-  document.getElementById("ausgabe" + (i+1)).innerHTML = row;
+  return counter;
 }
 
+function getNeighborChange(p){
+  //if(p<=8){
+    for(var m=p; m<columnArray.length;++m){
+      var column = columnArray[m];
+      var countMissing = getMissingElements(); 
+      if(countMissing < 4){alert(countMissing);break;}
 
-//   function makeComparison(){
-//     for(var i=0;i<sudokuArray.length;++i){
-//       var testRow = sudokuArray[i];
+      //alert("column: " + column);
+      doubledElements = getUniqueOrDouble(column, doubled=1);
+      //alert("doubledElements all: " + doubledElements);
+      if(doubledElements == undefined ){
+        
+        if(p==8){
+          if(countMissing > 4){getNeighborChange(p=0);}
+          else {break;}
+        }
+        else{getNeighborChange(p+=1);}
+        
+      }
+      else{changeDoubled(m, p, column, doubledElements);}
       
-//       for(var j=i+1;j<sudokuArray.length;++j){
-//         var changeRow = sudokuArray[j];
-//         var changedArray = compareArrays(testRow, changeRow);
-//         sudokuArray.splice(j, 1, changedArray);
-//         var ausgabe = "ausgabe" + (j+1);
-//         document.getElementById(ausgabe).innerHTML = changedArray;
-//       }
-//     }
-//   }
+    }
+}
 
-// function compareArrays(array1, array2){
-//     for(var i=0;i<array1.length;++i){
-//       var check1 = array1[i];
-//       var check2 = array2[i];
-//       if(check1 === check2){
-//         array2.splice(i, 2, array2[i+1], array2[i]);
-//       }
-//     }
-//     return array2;
-//   }
+function changeDoubled(m, p, column, doubledElements){
+ 
+  var elementDoubled = doubledElements[0];
+  findChangeElement(column, elementDoubled, m, p);
+}
+ 
+function findChangeElement(column, elementDoubled, m, p){
+  var updateMissing = getMissingElements();
+  var arrayMissing = missingElements[m];
+  //alert("missing in column: " + arrayMissing);
+  for (l=0;l<arrayMissing.length;++l){
+    var n = column.indexOf(doubledElements[0]);
+    //alert("first doubled: " + doubledElements[0]);
+    //alert("n: " + n);
+    var elementMissing = arrayMissing[l];
+    var row = sudokuArray[n];
+
+    var changerIndex = row.indexOf(elementMissing);    
+   
+    //alert("row: " + row);
+    row.splice(changerIndex, 1, elementDoubled);
+    row.splice(m, 1, elementMissing);
+    doubledElements.splice(0, 1);
+    //alert("row: " + row);
+    updateArrays(n, row);
+    //break;
+    findNextChange(m, p);
+    break;
+      
+  }
+}
+
+function findNextChange(m, p){
+  var doubledElements = getUniqueOrDouble(columnArray[m], doubled=1);
+  //alert("doubledElements next: " + doubledElements);
+  if(doubledElements !== undefined){
+    //alert("changeDoubled again!");
+    changeDoubled(m, p, columnArray[m], doubledElements);
+  }
+  else{
+    //alert("next column");
+    getNeighborChange(p+=1);
+  }
+}
+
+function getSquareOfNines(){
+  alert("haha");
+}
+
+function updateArrays(n, row){
+  sudokuArray.splice(n, 1, row);
+  getColumns();
+  var ausgabe = "ausgabe" + (n+1);
+  loadView(ausgabe, row);
+}
+
 
 
   function checkAgainstNine(array){
@@ -121,8 +161,8 @@ function findChangeElement(i){
         }
         else {doubleChoices.push(array[i]);}
     }
-    if(doubled){return doubleChoices;}
-    else{return uniqueChoices;}
+    if(doubleChoices.length > 0){return doubleChoices;}
+    else{return undefined;}
   }
   
   
@@ -140,6 +180,7 @@ function findChangeElement(i){
   }
 
   function getColumns(){
+    columnArray = [[],[],[],[],[],[],[],[],[]];
     for(var i=0;i<sudokuArray.length;++i){
       var getColumnArray = sudokuArray[i];
       pushColumns(getColumnArray);
@@ -160,9 +201,6 @@ function findChangeElement(i){
 
   
 function manageComputation(){
-  sudokuArray = [];
-  columnArray = [[],[],[],[],[],[],[],[],[]];
-  missingElements = [];
   makeSudokuArray();
   getColumns();
   manageNumberChange();
