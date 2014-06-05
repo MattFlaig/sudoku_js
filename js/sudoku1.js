@@ -12,7 +12,7 @@ var missingElements = [];
     makeSudokuArray();
     getBlock();
     manageBlocks();
-    changeElements();
+    changeElements(arrayIndex=0);
   }
 
   function makeSudokuArray(){
@@ -39,6 +39,8 @@ var missingElements = [];
   }
 
   function getBlock(){
+    firstBlock = [], secondBlock = [], thirdBlock = [];
+    
   	for(var i=0;i<sudokuArray.length;++i){
       var row = sudokuArray[i];
       pushToBlock(row);
@@ -65,6 +67,7 @@ var missingElements = [];
   }
 
   function manageBlocks(){
+    
   	fillBlockArray();
     var counter = 0;
 
@@ -72,15 +75,18 @@ var missingElements = [];
     	var block = blockArray[i];
     	//alert("block: " + block);
     	var check = checkAgainstNine(block);
-    	missingElements.push(check);
-    	counter += check.length
+      if(check != undefined){
+    	  missingElements.push(check);
+    	  counter += check.length
+      }
     }
     //alert(counter);
+    
     if(counter >= 3){manageComputation();}
-
   }
 
   function fillBlockArray(){
+    blockArray = [];
     blockArray.push(firstBlock);
     blockArray.push(secondBlock);
     blockArray.push(thirdBlock);
@@ -104,7 +110,7 @@ var missingElements = [];
         checkArray.push(i);
       }
     }
-    return checkArray;
+    if(checkArray.length > 0){return checkArray;}
   }
 
   function getUniqueOrDouble(array, doubled) {
@@ -120,29 +126,72 @@ var missingElements = [];
     else{return undefined;}
   }
 
-  function changeElements(){
-  	for(var i=0;i<blockArray.length;++i){
-  	  var block = blockArray[i];
+  function changeElements(arrayIndex){
+  	  var block = blockArray[arrayIndex];
   	  var check = checkAgainstNine(block);
-  	  //alert(check);
-  	  var blockIndex = block.indexOf(check);
-  	  var doubledElement = getUniqueOrDouble(block, doubled=1);
-  	  //alert(doubledElement);
-  	  if(check.length > 0  && doubledElement.length > 0){
-  	  	//alert("yeah");
+      if(check != undefined){
+    	  var doubledElement = getUniqueOrDouble(block, doubled=1);
+        var blockIndex = block.indexOf(doubledElement[0]);
         var rowIndex = parseInt(blockIndex / 3);
-        //alert(rowIndex);
         var row = sudokuArray[rowIndex];
         var checkIndex = row.indexOf(check[0]);
-        //alert(checkIndex);
         var doubledIndex = row.indexOf(doubledElement[0]);
-        //alert(doubledIndex);
-        row.splice(checkIndex, 1, doubledElement);
-        row.splice(doubledIndex, 1, check);
 
-        var ausgabe = "ausgabe" + (rowIndex+1);
-        loadView(ausgabe, row);
-  	  }
-        
-  	}
+        findChangeBlock(checkIndex, check, doubledIndex, doubledElement, rowIndex, row, block);
+      }
+      else{
+        if(arrayIndex < 1){
+          changeElements(arrayIndex=1);
+        }
+      }
   }
+
+
+function findChangeBlock(checkIndex, check, doubledIndex, doubledElement, rowIndex, row, block){
+  if(checkIndex > 5){
+    changeInLastBlock(checkIndex, check, doubledIndex, doubledElement, rowIndex, row, block);
+  }
+  else{
+    changeInNextBlock(checkIndex, check, doubledIndex, doubledElement, rowIndex, row, block);
+  }
+}
+
+function changeInNextBlock(checkIndex, check, doubledIndex, doubledElement, rowIndex, row, block){
+  var checkNextBlock = checkAgainstNine(blockArray[1]);
+  blockChange(checkNextBlock, checkIndex, check, doubledIndex, doubledElement, rowIndex, row, block);
+}
+
+function changeInLastBlock(checkIndex, check, doubledIndex, doubledElement, rowIndex, row, block){
+  var checkLastBlock = checkAgainstNine(blockArray[2]);
+  blockChange(checkLastBlock, checkIndex, check, doubledIndex, doubledElement, rowIndex, row, block);
+}
+
+function blockChange(checkBlock, checkIndex, check, doubledIndex, doubledElement, rowIndex, row, block){
+  if(checkBlock != undefined){
+    if(checkBlock[0] == doubledElement[0]){
+      manageChange(checkIndex, check, doubledIndex, doubledElement, rowIndex, row);
+    }
+  }
+  else {
+    alternativeChange(block, check, doubledElement);
+  }
+}
+
+function manageChange(checkIndex, check, doubledIndex, doubledElement, rowIndex, row){
+  row.splice(checkIndex, 1, doubledElement);
+  row.splice(doubledIndex, 1, check);
+  var ausgabe = "ausgabe" + (rowIndex+1);
+  loadView(ausgabe, row);
+  getBlock();
+  fillBlockArray();
+}
+
+
+function alternativeChange(block, check, doubledElement){
+  var blockNextIndex = block.lastIndexOf(doubledElement[0]);
+  var rowNextIndex = parseInt(blockNextIndex / 3);
+  var rowNext = sudokuArray[rowNextIndex];
+  var checkNextIndex = rowNext.indexOf(check[0]);
+  var doubledNextIndex = rowNext.indexOf(doubledElement[0]);
+  manageChange(checkNextIndex, check, doubledNextIndex, doubledElement, rowNextIndex, rowNext);
+}
