@@ -1,33 +1,51 @@
-var sudokuArray = [];
-var blockArray = [];
-var firstBlock = [];
-var secondBlock = [];
-var thirdBlock = [];
+var firstPhase = false;
+var sudokuArray1 = [];
+var blockArray1 = [];
+var firstBlock1 = [];
+var secondBlock1 = [];
+var thirdBlock1 = [];
 var missingElements = [];
-var columnArray = [[],[],[],[],[],[],[],[],[]];
+var columnArray1 = [];
 
 
 
-// var missingElements = [];
-// var doubledElements = [];
 
-  function manageComputation(){
-  	sudokuArray = [], blockArray = [], missingElements = [];
-    firstBlock = [], secondBlock = [], thirdBlock = [];
-    makeSudokuArray();
-    getBlock();
-    manageBlocks();
-    changeElements(arrayIndex=0);
-    getColumns();
-    continueBlocks();
+var secondPhase = false;
+var sudokuArray2 = [];
+var blockArray2 = [];
+var firstBlock2 = [];
+var secondBlock2 = [];
+var thirdBlock2 = [];
+var missingElements2 = [];
+var columnArray2 = [];
+
+
+
+  function manageComputation(phase){
+    if(phase=='first'){
+      firstPhase = true, columnArray1 = [];
+    	sudokuArray1 = [], blockArray1 = [], missingElements = [];
+      firstBlock1 = [], secondBlock1 = [], thirdBlock1 = [];
+      makeSudokuArray(sudokuArray1, 1, 4);
+      getBlock(sudokuArray1, firstBlock1, secondBlock1, thirdBlock1);
+      manageBlocks(firstBlock1, secondBlock1, thirdBlock1, blockArray1);
+    }
+    else if(phase=='second'){
+      firstPhase = false, secondPhase = true;
+      sudokuArray2 = [], blockArray2 = [], columnArray2 = [];
+      firstBlock2 = [], secondBlock2 = [], thirdBlock2 = [];
+      makeSudokuArray(sudokuArray2, 4, 7);
+      getBlock(sudokuArray2, firstBlock2, secondBlock2, thirdBlock2);
+      manageBlocks(firstBlock2, secondBlock2, thirdBlock2, blockArray2);
+    }
   }
 
-  function makeSudokuArray(){
-    sudokuArray = [];
-    for(var i=1;i<4;++i){
+  function makeSudokuArray(array, begin, end){
+    //alert(begin);
+    for(var i=begin;i<end;++i){
       var ausgabe = "ausgabe" + i;
       var randomArray = findRandomArray();
-      sudokuArray.push(randomArray);
+      array.push(randomArray);
       loadView(ausgabe, randomArray);
     }
   }
@@ -45,16 +63,16 @@ var columnArray = [[],[],[],[],[],[],[],[],[]];
     return newArray;
   }
 
-  function getBlock(){
-    firstBlock = [], secondBlock = [], thirdBlock = [];
+
+  function getBlock(rowArray, firstBlock, secondBlock, thirdBlock){
     
-  	for(var i=0;i<sudokuArray.length;++i){
-      var row = sudokuArray[i];
-      pushToBlock(row);
+  	for(var i=0;i<rowArray.length;++i){
+      var row = rowArray[i];
+      pushToBlock(row, firstBlock, secondBlock, thirdBlock);
     }
   }
 
-  function pushToBlock(array){
+  function pushToBlock(array, firstBlock, secondBlock, thirdBlock){
   	
     for(var i=0;i<array.length;++i){
       var blockElement = array[i];
@@ -73,9 +91,9 @@ var columnArray = [[],[],[],[],[],[],[],[],[]];
     document.getElementById(ausgabe).innerHTML = array;
   }
 
-  function manageBlocks(){
+  function manageBlocks(firstBlock, secondBlock, thirdBlock, blockArray){
     
-  	fillBlockArray();
+  	fillBlockArray(firstBlock, secondBlock, thirdBlock, blockArray);
     var counter = 0;
 
     for(i=0;i<blockArray.length;++i){
@@ -83,17 +101,34 @@ var columnArray = [[],[],[],[],[],[],[],[],[]];
     	//alert("block: " + block);
     	var check = checkAgainstNine(block);
       if(check != undefined){
-    	  missingElements.push(check);
+    	  //missingElements.push(check);
     	  counter += check.length
       }
     }
-    //alert(counter);
+   
     
-    if(counter >= 3){manageComputation();}
+    if(counter >= 3){
+      if (firstPhase){manageComputation('first');}
+      else if(secondPhase){manageComputation('second');}
+      
+    }
+    else{
+      if (firstPhase){
+        changeElements(arrayIndex=0, blockArray1, sudokuArray1);
+        getColumns(sudokuArray1, columnArray1);
+        giveFeedback();
+      }
+      else if(secondPhase){
+        changeElements(arrayIndex=0, blockArray2, sudokuArray2);
+        getColumns(sudokuArray2, columnArray2);
+        compareForDoubles(columnArray1, columnArray2);
+      }
+    }
   }
 
-  function fillBlockArray(){
-    blockArray = [];
+
+
+  function fillBlockArray(firstBlock, secondBlock, thirdBlock, blockArray){
     blockArray.push(firstBlock);
     blockArray.push(secondBlock);
     blockArray.push(thirdBlock);
@@ -117,7 +152,6 @@ var columnArray = [[],[],[],[],[],[],[],[],[]];
         checkArray.push(i);
       }
     }
-    //if(signal){alert("checkArray: " + checkArray);}
     if(checkArray.length > 0){return checkArray;}
   }
 
@@ -130,12 +164,13 @@ var columnArray = [[],[],[],[],[],[],[],[],[]];
         }
         else {doubleChoices.push(array[i]);}
     }
-    if(doubleChoices.length > 0){return doubleChoices;}
+    if(doubled && doubleChoices.length > 0){/*alert("doubled: " + doubleChoices);*/return doubleChoices; }
     else if(!doubled){return uniqueChoices;}
     else{return undefined;}
   }
 
-  function changeElements(arrayIndex){
+  function changeElements(arrayIndex, blockArray, sudokuArray){
+      alert("changing!");
   	  var block = blockArray[arrayIndex];
   	  var check = checkAgainstNine(block);
       if(check != undefined){
@@ -146,31 +181,31 @@ var columnArray = [[],[],[],[],[],[],[],[],[]];
         var checkIndex = row.indexOf(check[0]);
         var doubledIndex = row.indexOf(doubledElement[0]);
 
-        findChangeBlock(checkIndex, check, doubledIndex, doubledElement, rowIndex, row, block);
+        findChangeBlock(checkIndex, check, doubledIndex, doubledElement, rowIndex, row, block, blockArray);
       }
       else{
         if(arrayIndex < 1){
-          changeElements(arrayIndex=1);
+          changeElements(arrayIndex=1, blockArray, sudokuArray);
         }
       }
   }
 
 
-function findChangeBlock(checkIndex, check, doubledIndex, doubledElement, rowIndex, row, block){
+function findChangeBlock(checkIndex, check, doubledIndex, doubledElement, rowIndex, row, block, blockArray){
   if(checkIndex > 5){
-    changeInLastBlock(checkIndex, check, doubledIndex, doubledElement, rowIndex, row, block);
+    changeInLastBlock(checkIndex, check, doubledIndex, doubledElement, rowIndex, row, block, blockArray);
   }
   else{
-    changeInNextBlock(checkIndex, check, doubledIndex, doubledElement, rowIndex, row, block);
+    changeInNextBlock(checkIndex, check, doubledIndex, doubledElement, rowIndex, row, block, blockArray);
   }
 }
 
-function changeInNextBlock(checkIndex, check, doubledIndex, doubledElement, rowIndex, row, block){
+function changeInNextBlock(checkIndex, check, doubledIndex, doubledElement, rowIndex, row, block, blockArray){
   var checkNextBlock = checkAgainstNine(blockArray[1]);
   blockChange(checkNextBlock, checkIndex, check, doubledIndex, doubledElement, rowIndex, row, block);
 }
 
-function changeInLastBlock(checkIndex, check, doubledIndex, doubledElement, rowIndex, row, block){
+function changeInLastBlock(checkIndex, check, doubledIndex, doubledElement, rowIndex, row, block, blockArray){
   var checkLastBlock = checkAgainstNine(blockArray[2]);
   blockChange(checkLastBlock, checkIndex, check, doubledIndex, doubledElement, rowIndex, row, block);
 }
@@ -182,21 +217,39 @@ function blockChange(checkBlock, checkIndex, check, doubledIndex, doubledElement
     }
   }
   else {
-    alternativeChange(block, check, doubledElement);
+    if(firstPhase){
+      alternativeChange(block, check, doubledElement, sudokuArray1);
+    }
+    else if(secondPhase){
+      alternativeChange(block, check, doubledElement, sudokuArray2);
+    }
   }
 }
 
 function manageChange(checkIndex, check, doubledIndex, doubledElement, rowIndex, row){
-  row.splice(checkIndex, 1, doubledElement);
-  row.splice(doubledIndex, 1, check);
-  var ausgabe = "ausgabe" + (rowIndex+1);
-  loadView(ausgabe, row);
-  getBlock();
-  fillBlockArray();
+  row.splice(checkIndex, 1, doubledElement[0]);
+  row.splice(doubledIndex, 1, check[0]);
+
+  if(firstPhase){
+    sudokuArray1.splice(rowIndex, 1, row);
+    var ausgabe = "ausgabe" + (rowIndex+1);
+    loadView(ausgabe, row);
+    getColumns(sudokuArray1, columnArray1);
+    getBlock(sudokuArray1, firstBlock1, secondBlock1, thirdBlock1);
+    fillBlockArray(firstBlock1, secondBlock1, thirdBlock1, blockArray1);
+  }
+  else if(secondPhase){
+    sudokuArray2.splice(rowIndex, 1, row);
+    var ausgabe = "ausgabe" + (rowIndex+4);
+    loadView(ausgabe, row);
+    getColumns(sudokuArray2, columnArray2);
+    getBlock(sudokuArray2, firstBlock2, secondBlock2, thirdBlock2);
+    fillBlockArray(firstBlock2, secondBlock2, thirdBlock2, blockArray2);
+  }
 }
 
 
-function alternativeChange(block, check, doubledElement){
+function alternativeChange(block, check, doubledElement, sudokuArray){
   var blockNextIndex = block.lastIndexOf(doubledElement[0]);
   var rowNextIndex = parseInt(blockNextIndex / 3);
   var rowNext = sudokuArray[rowNextIndex];
@@ -205,26 +258,69 @@ function alternativeChange(block, check, doubledElement){
   manageChange(checkNextIndex, check, doubledNextIndex, doubledElement, rowNextIndex, rowNext);
 }
 
-
-function getColumns(){
-  columnArray = [[],[],[],[],[],[],[],[],[]];
-  for(var i=0;i<sudokuArray.length;++i){
-    var getColumnArray = sudokuArray[i];
-    pushColumns(getColumnArray);
+function getColumns(sudokuArray, columnArray){
+  
+  for(var k=0;k<9;++k){
+    var column = [];
+    for(var l=0;l<3;++l){
+      var columnElement = sudokuArray[l][k];
+      column.push(columnElement);
+    }
+    columnArray.push(column)
   }
 }
 
-
-  function pushColumns(getColumnArray){
-    for(var j=0; j<getColumnArray.length; ++j){
-      var columnElement = getColumnArray[j];
-      for(k=0;k<9;++k){
-        if(j==k){
-          columnArray[k].push(columnElement);
-        }
-      }
+function compareForDoubles(columnArray1, columnArray2){
+var doubleCounter = 0;
+  for(var i = 0; i<3;++i){
+    var composedArray = columnArray1[i].concat(columnArray2[i]);
+    //alert("composed array: " + composedArray);
+    var checkDouble = getUniqueOrDouble(composedArray, doubled=1);
+    if(checkDouble != undefined){
+      document.getElementById("message2").innerHTML = "Second phase aborted. Please press the button again!";
+      break;
+    }
+    else{
+      document.getElementById("message2").innerHTML = "Second phase successfully created!";
     }
   }
+}
+
+function giveFeedback(){
+    document.getElementById("message1").innerHTML = "First phase successfully created!";
+
+}
+
+// function getColumn(columnArray, sudokuArray){
+//   var counter = 0;
+//   for(var i=0;i<sudokuArray.length;++i){
+    
+//     var row = sudokuArray[i];
+//     counter += 1;
+//     alert(counter);
+//     if(counter<=3){
+//       pushColumns(row, columnArray);
+//     }
+//     else{
+//       break;
+//     }
+//   }
+// }
+
+
+//   function pushColumns(row, columnArray){
+//     for(var j=0; j<row.length; ++j){
+//       var columnElement = row[j];
+//       for(var k=0;k<9;++k){
+//         if(j==k){
+//           columnArray[k].push(columnElement);
+//           // if(columnArray[8].length == 3){
+//           //   break;
+//           // }
+//         }
+//       }
+//     }
+//   }
 
 
 /*BLOCKS 4 AND HIGHER*/
@@ -334,23 +430,3 @@ function getColumns(){
 // //     }
 // //     return comparisonArray;
 // // }
-
-function getColumns(){
-  columnArray = [[],[],[],[],[],[],[],[],[]];
-  for(var i=0;i<sudokuArray.length;++i){
-    var getColumnArray = sudokuArray[i];
-    pushColumns(getColumnArray);
-  }
-}
-
-
-  function pushColumns(getColumnArray){
-    for(var j=0; j<getColumnArray.length; ++j){
-      var columnElement = getColumnArray[j];
-      for(k=0;k<9;++k){
-        if(j==k){
-          columnArray[k].push(columnElement);
-        }
-      }
-    }
-  }
