@@ -121,7 +121,7 @@ var columnArray2 = [];
       else if(secondPhase){
         changeElements(arrayIndex=0, blockArray2, sudokuArray2);
         getColumns(sudokuArray2, columnArray2);
-        compareForDoubles(columnArray1, columnArray2);
+        compareForDoubles(columnArray1, columnArray2, begin=0, end=3);
       }
     }
   }
@@ -170,7 +170,7 @@ var columnArray2 = [];
   }
 
   function changeElements(arrayIndex, blockArray, sudokuArray){
-      alert("changing!");
+      //alert("changing!");
   	  var block = blockArray[arrayIndex];
   	  var check = checkAgainstNine(block);
       if(check != undefined){
@@ -270,24 +270,41 @@ function getColumns(sudokuArray, columnArray){
   }
 }
 
-function compareForDoubles(columnArray1, columnArray2){
+function compareForDoubles(columnArray1, columnArray2, begin, end){
 var doubleCounter = 0;
-  for(var i = 0; i<3;++i){
+  for(var i = begin; i<end;++i){
     var composedArray = columnArray1[i].concat(columnArray2[i]);
     //alert("composed array: " + composedArray);
     var checkDouble = getUniqueOrDouble(composedArray, doubled=1);
-    if(checkDouble != undefined){
-      document.getElementById("message2").innerHTML = "Second phase aborted. Please press the button again!";
-      break;
-    }
+    if(begin == 0){
+      if(checkDouble != undefined){
+        document.getElementById("message2").innerHTML = "Second phase aborted. Please press the button again!";
+        break;
+      }
+      else{
+        document.getElementById("message2").innerHTML = "Second phase successfully created!";
+        compareForDoubles(columnArray1, columnArray2, begin=3, end=9);
+      }
     else{
-      document.getElementById("message2").innerHTML = "Second phase successfully created!";
+      if(checkDouble != undefined){
+        neighborChange(checkDouble);
+      }
     }
   }
 }
 
 function giveFeedback(){
     document.getElementById("message1").innerHTML = "First phase successfully created!";
+
+}
+
+function neighborChange(checkDouble){
+  for(j=0;j<checkDouble.length;++j){
+    if(i<6){var doubledInArray = secondBlock2.indexOf(checkDouble[j]);}
+    else{var doubledInArray = thirdBlock2.indexOf(checkDouble[j]);}
+
+    
+  }
 
 }
 
