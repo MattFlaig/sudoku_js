@@ -121,7 +121,7 @@ var columnArray2 = [];
       else if(secondPhase){
         changeElements(arrayIndex=0, blockArray2, sudokuArray2);
         getColumns(sudokuArray2, columnArray2);
-        compareForDoubles(columnArray1, columnArray2, begin=0, end=3);
+        compareForDoubles(columnArray1, columnArray2);
       }
     }
   }
@@ -242,10 +242,14 @@ function manageChange(checkIndex, check, doubledIndex, doubledElement, rowIndex,
     sudokuArray2.splice(rowIndex, 1, row);
     var ausgabe = "ausgabe" + (rowIndex+4);
     loadView(ausgabe, row);
+    updateBlocksAndColumns2();
+  }
+}
+
+function updateBlocksAndColumns2(){
     getColumns(sudokuArray2, columnArray2);
     getBlock(sudokuArray2, firstBlock2, secondBlock2, thirdBlock2);
     fillBlockArray(firstBlock2, secondBlock2, thirdBlock2, blockArray2);
-  }
 }
 
 
@@ -270,24 +274,35 @@ function getColumns(sudokuArray, columnArray){
   }
 }
 
-function compareForDoubles(columnArray1, columnArray2, begin, end){
-var doubleCounter = 0;
-  for(var i = begin; i<end;++i){
+function compareForDoubles(columnArray1, columnArray2){
+var columnsWithDoubledNumber = 0;
+var columnsWithDoubled = [];
+var doubleIndexes = [];
+  for(var i = 0; i<9;++i){
     var composedArray = columnArray1[i].concat(columnArray2[i]);
-    //alert("composed array: " + composedArray);
     var checkDouble = getUniqueOrDouble(composedArray, doubled=1);
-    if(begin == 0){
-      if(checkDouble != undefined){
-        document.getElementById("message2").innerHTML = "Second phase aborted. Please press the button again!";
+    if(i == 8 && columnsWithDoubledNumber > 4){
+        document.getElementById("message2").innerHTML = "Second phase not ready yet. Please press the button again!";
         break;
-      }
-      else{
-        document.getElementById("message2").innerHTML = "Second phase successfully created!";
-        compareForDoubles(columnArray1, columnArray2, begin=3, end=9);
-      }
+    }
     else{
-      if(checkDouble != undefined){
-        neighborChange(checkDouble);
+      if(checkDouble !== undefined){
+        columnsWithDoubledNumber += 1;
+        columnsWithDoubled.push(i);
+        var doubledIndex = columnArray2[i].indexOf(checkDouble[0]);
+        doubleIndexes.push(doubledIndex);
+        if(i == 8 && columnsWithDoubledNumber <= 4){
+          
+            alert("First step!");
+            document.getElementById("message2").innerHTML = "First step of second phase finished!";
+            alert("doubled in columns: " + columnsWithDoubled);
+            //alert(doubleIndexes);
+            neighborChange(columnsWithDoubled, doubleIndexes);
+        }
+        //   else{
+        //     document.getElementById("message2").innerHTML = "Second phase successfully created!";
+        //   }
+        // }
       }
     }
   }
@@ -295,19 +310,106 @@ var doubleCounter = 0;
 
 function giveFeedback(){
     document.getElementById("message1").innerHTML = "First phase successfully created!";
-
 }
 
-function neighborChange(checkDouble){
-  for(j=0;j<checkDouble.length;++j){
-    if(i<6){var doubledInArray = secondBlock2.indexOf(checkDouble[j]);}
-    else{var doubledInArray = thirdBlock2.indexOf(checkDouble[j]);}
 
+function neighborChange(columnsWithDoubled, doubleIndexes){
+  for(j=0;j<columnsWithDoubled.length;++j){
+    var column = columnArray2[j];
+    alert("column: " + column);
+    var columnIndex = parseInt(columnsWithDoubled[j]);
+    alert("columnIndex: " + columnIndex);
+    var deleteIndex = doubleIndexes[j];
+    alert("deleteIndex: " + deleteIndex);
+    var doubledElement = column[deleteIndex];
+    alert("doubledElement: " + doubledElement);
+    
+    if((columnIndex+1)%3 == 0 ){alert((columnIndex+1)%3);
+      var changeElement = sudokuArray2[deleteIndex][columnIndex-2];
+      alert("changeElement: " + changeElement);
+      sudokuArray2[deleteIndex].splice((columnIndex-2),3, doubledElement, sudokuArray2[deleteIndex][columnIndex-1], changeElement);
+      updateDoubles(columnsWithDoubled, doubleIndexes, changeElement);
+      changeLoop();
+
+    }
+    else{
+      var changeElement = sudokuArray2[deleteIndex][columnIndex+1];
+      alert("changeElement: " + changeElement);
+      sudokuArray2[deleteIndex].splice(columnIndex,2, changeElement, doubledElement);
+      updateDoubles(columnsWithDoubled, doubleIndexes, changeElement);
+      changeLoop();
+    }
     
   }
-
 }
 
+function updateDoubles(columnsWithDoubled, doubleIndexes, changeElement){
+  for(k=0;k<doubleIndexes.length;++k){
+    var index = doubleIndexes[k];
+    if(changeElement == columnArray2[j+1][index]){
+      columnsWithDoubled.splice(j+1, 1);
+      doubleIndexes.splice(j+1, 1);
+    }
+  }
+  alert(columnsWithDoubled);
+}
+
+function changeLoop(){
+  updateView();
+  updateBlocksAndColumns2();
+  //compareForDoubles(columnArray1, columnArray2);
+}
+
+
+
+
+
+    // if(checkelement>3){
+    //   if(checkElement < 7){
+    //   var doubledInArray = secondBlock2.indexOf(checkElement[j]);
+    // //else{var doubledInArray = thirdBlock2.indexOf(checkDouble[j]);}
+    //     if(doubledInArray > 2){
+    //       if(doubledInArray > 5){
+    //         if(doubledInArray-3 <= 4){
+    //           sudokuArray2[2].splice((doubledInArray-3),2, sudokuArray2[2][doubledInArray-2], sudokuArray2[2][doubledInArray-3]);
+    //         }
+    //         else{
+    //           sudokuArray2[2].splice((doubledInArray-4),2, sudokuArray2[2][doubledInArray-3], sudokuArray2[2][doubledInArray-4]);
+    //         }
+    //       }
+    //       else{
+    //         if(doubledInArray <= 4){
+    //           sudokuArray2[1].splice((doubledInArray),2, sudokuArray2[1][doubledInArray+1], sudokuArray2[1][doubledInArray]);
+    //         }
+    //         else{
+    //           sudokuArray2[1].splice((doubledInArray-1),2, sudokuArray2[1][doubledInArray], sudokuArray2[1][doubledInArray-1]);
+    //         }
+    //       }
+    //     }
+    //     else{
+    //       if(doubledInArray+3 <= 4){
+    //         sudokuArray2[0].splice((doubledInArray+3),2, sudokuArray2[0][doubledInArray+4], sudokuArray2[0][doubledInArray+3]);
+    //       }
+    //       else{
+    //         sudokuArray2[0].splice((doubledInArray+2),2, sudokuArray2[0][doubledInArray+3], sudokuArray2[0][doubledInArray+2]);
+    //       }
+    //     }
+    //   }
+    //   else{
+
+//     //   }
+//     // }
+//   }
+  
+// }
+
+function updateView(){
+  for(var i=0;i<sudokuArray2.length;++i){
+    var row = sudokuArray2[i];
+    var ausgabe = "ausgabe" + (i+4);
+    loadView(ausgabe, row);
+  }
+}
 // function getColumn(columnArray, sudokuArray){
 //   var counter = 0;
 //   for(var i=0;i<sudokuArray.length;++i){
