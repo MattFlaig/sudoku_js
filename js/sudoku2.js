@@ -13,17 +13,20 @@ function manageComputation(){
   computeFirstBlock();
   computeSecondBlock();
   computeThirdBlock();
+  computeFourthBlock();
+  computeFifthBlock();
 }
 
 
 
 function computeFirstBlock(){
   prepareRows(fillArray);
+  var blockNumber = 1;
   //alert(checkRows); 
   var arrayOfNines = [1,2,3,4,5,6,7,8,9];
   var firstBlock = findRandomArray(arrayOfNines);
   //alert(checkRows); 
-  var blockNumber = 1;
+  
   var messageFirst = "First Block successfully computed!";
   pushToRows(firstBlock, blockNumber);
   //alert(checkRows); 
@@ -38,9 +41,10 @@ function computeFirstBlock(){
 }
 
 function computeSecondBlock(){
-  var secondBlock = getNextBlock();
+  var blockNumber = 2;
+  var secondBlock = getNextBlock(blockNumber);
   
-   var blockNumber = 2;
+   
    var messageSecond = "Second Block successfully computed!";
    pushToRows(secondBlock, blockNumber);
    pushToColumns(secondBlock, blockNumber);
@@ -53,9 +57,10 @@ function computeSecondBlock(){
 }
 
 function computeThirdBlock(){
+  var blockNumber = 3;
   var thirdBlock = fillWithMissingElements();
   
-   var blockNumber = 3;
+   
    var messageThird = "Third Block successfully computed!";
    pushToRows(thirdBlock, blockNumber);
    pushToColumns(thirdBlock, blockNumber);
@@ -67,12 +72,44 @@ function computeThirdBlock(){
    visualizeRows();
 }
 
+function computeFourthBlock(){
+  prepareRows(fillArray);
+  var blockNumber = 4;
+  var fourthBlock = getFourthBlock();
+  
+  
+  var messageFourth = "Fourth Block successfully computed!";
+  pushToRows(fourthBlock, blockNumber);
+  pushToColumns(fourthBlock, blockNumber);
+
+  showMessage(messageFourth);//alert(secondBlock);
+  computingRound += 1;
+  //alert("fourthBlock: " + fourthBlock);
+  pushSecondBlockRow(fourthBlock, fillArray);
+  visualizeRows();
+}
+
+function computeFifthBlock(){
+  var blockNumber = 5;
+  var fifthBlock = getNextBlock(blockNumber);
+  
+  
+  // var messageFifth = "Fifth Block successfully computed!";
+  // pushToRows(fifthBlock, blockNumber);
+  // pushToColumns(fifthBlock, blockNumber);
+
+  // showMessage(messageFifth);//alert(secondBlock);
+  // computingRound += 1;
+  // pushSecondBlockRow(fifthBlock, fillArray);
+  //visualizeRows();
+}
 
 
-function prepareRows(array){
+
+function prepareRows(prepareArray){
   for(var i=0;i<9;++i){
     var emptyArray = [];
-    array.push(emptyArray);
+    prepareArray.push(emptyArray);
   }
 }
 
@@ -96,14 +133,38 @@ function findRandomArray(array){
   return newArray;
 }
 
-function getNextBlock(){
-  //var nextBlock = [];
-  //var stillThere = fillArray[0].concat(fillArray[1]);
-  var firstTwoLines = getFirstTwoLines();
-  var allLines = insertLastLine(firstTwoLines);
-  return allLines;
-  //alert(firstTwoLines);
+function getNextBlock(blockNumber){
+  if(blockNumber==2){
+    var firstTwoLines = getFirstTwoLines();
+    var allLines = insertLastLine(firstTwoLines);
+    return allLines;
+  }
+  else if(blockNumber==5){
+    var firstTwoLines = compareLinesAndColumns();
+    alert(firstTwoLines);
+    
+  }
 
+}
+
+function compareLinesAndColumns(){
+  var flag = true;
+ 
+  while(flag){
+    var counter = 0, firstTwoLines = getFirstTwoLines();
+    var secondLine = [firstTwoLines[3], firstTwoLines[4], firstTwoLines[5]];
+    var comparisonColumns = [columns[3], columns[4], columns[5]];
+    for(var i=0;i<comparisonColumns.length;++i){
+      var column = comparisonColumns[i];
+      var compareArray = column.push(secondLine[i]);
+      var checkDouble = getUniqueOrDouble(compareArray, doubled=1);
+      if(checkDouble != undefined){
+        counter+=1;
+      }
+      if(i==2 && counter <= 2){flag=false;}
+    }
+  }
+  return firstTwoLines;
 }
 
 function getFirstTwoLines(){
@@ -111,6 +172,10 @@ function getFirstTwoLines(){
   if(computingRound == 2){
     var stillThere = fillArray[0].concat(fillArray[1]);
     var first = fillArray[0], second = fillArray[1];
+  }
+  else if(computingRound == 5){
+    var stillThere = fillArray[3].concat(fillArray[4]);
+    var first = fillArray[3], second = fillArray[4];
   }
   lines = getfirstTwoFields(second, stillThere);
   var thirdField = getThirdField(lines, first);
@@ -121,12 +186,12 @@ function getFirstTwoLines(){
   return lines;
 }
 
-function updateStillThere(lines, stillThere){
-  for(var i = 0; i<lines.length;++i){
-    var lineElement = lines[i];
+function updateStillThere(updateArray, stillThere){
+  for(var i = 0; i<updateArray.length;++i){
+    var arrayElement = updateArray[i];
     for(var j=0; j<stillThere.length;++j){
       stillThereElement = stillThere[j];
-      if(lineElement == stillThereElement){
+      if(arrayElement == stillThereElement){
         stillThere.splice(j,1);
       }
     }
@@ -225,83 +290,60 @@ function fillWithMissingElements(){
   return thirdBlock;
 }
 
+function getFourthBlock(){
+  var block = [];
+  var flag = true;
+  while(flag==true){
+    for(var i=1;i<10;++i){
+      var indexNumber = i % 3;
+      if(indexNumber==0){var columnNumber = 2;}
+      else{var columnNumber = indexNumber - 1;}
+      var stillPossible = checkAgainstNine(columns[columnNumber]);
+      if(block != []){
+        stillPossible = updateStillThere(block, stillPossible);
+      }
+      var nextElement = getOneByRandom(stillPossible);
+      block.push(nextElement);
+      if(block.length == 9){
+        var endCheck = checkAgainstNine(block);
+        if(endCheck == undefined){flag=false; break;}
+        else{block = [];}
+      }
+    }
+  }
+  return block;
+}
 
+// function getFifthBlock(){
+//   var fifthBlock = [];
+//   for(var i=1;i<10;++i){
+//     var indexNumber = (i % 3);
+//     if(indexNumber==0){var addingNumber = 5;}
+//     else{var addingNumber = 2;}
 
-
-
-
-// function findSecondBlock(){
-//   var array = [1,2,3,4,5,6,7,8,9], newArray = [];
-//   while(array.length != 0){
-//     var arrayIndex = randomChoice(array);
-//     var arrayElement = array[arrayIndex];
-//     var possibleElements = getPossibleElements(newArray);
-//     //alert("possible after compute: " + possibleElements);
+//     var stillPossibleColumn = checkAgainstNine(columns[indexNumber+addingNumber]);
+//     var stillPossibleRow = checkAgainstNine(rows[indexNumber+addingNumber]);
+//     var rowColumn = stillPossibleRow.concat(stillPossibleColumn);
+//     var possibleTotal = getUniqueOrDouble(rowColumn, doubled=1);
     
-//     if(possibleElements != undefined){
-//       var cleanedElements = cleanElements(possibleElements, newArray);
-//       for(i=0;i<cleanedElements.length;++i){
-//         var possible = cleanedElements[i];
-//         if(possible == arrayElement){
-//           newArray.push(arrayElement);
-//           array.splice(arrayIndex, 1);
-//         }
-//       }
+//     if(fifthBlock != []){
+//       possibleTotal = updateStillThere(fifthBlock, possibleTotal);
 //     }
-//     else{
-//       findSecondBlock();
-//     }
+//     var nextElement = getOneByRandom(possibleTotal);
+//     fifthBlock.push(nextElement);
 //   }
-//   return newArray;
+//   alert(fifthBlock);
+//   return fifthBlock;
 // }
 
-// function cleanElements(possibleElements, newArray){
-//   var cleanedElements = possibleElements;
-  
-//   if(newArray.length==5){
-//     cleanArray = [newArray[3], newArray[4]];
-//     for(i=0;i<rows.length;++i){
-//       var row = rows[i];
-//       var checkSame = row.concat(cleanArray);
-//       var uniqueCheckSame = getUniqueOrDouble(checkSame);
-//       if(uniqueCheckSame.length == 1){
-//         var cleanIndex = cleanedElements.indexOf(uniqueCheckSame);
-//         cleanedElements
-//       }
-//     }
-//   }
-//   return cleanedElements;
-// }
+
+
 
 function randomChoice(array){
   var arrayIndex = Math.floor(Math.random() * array.length);
   return arrayIndex;
 }
 
-// function getPossibleElements(newArray){
-//   if(newArray.length < 3){
-//     var possibleElements = checkAgainstNine(rows[0]);
-//   }
-//   else{
-//     var concatElements = concatAndUnique(newArray);
-//     var possibleElements = checkAgainstNine(concatElements);
-//   }
-//   //alert("possible: " + possibleElements);
-//   return possibleElements;
-// }
-
-// function concatAndUnique(newArray){
-//   if(newArray.length < 6){
-//     var concatElements = rows[1].concat(newArray);
-//     var uniqueElements = getUniqueOrDouble(concatElements);
-//   }
-//   else{
-//     var concatElements = rows[2].concat(newArray);
-//     var uniqueElements = getUniqueOrDouble(concatElements);
-//   }
-//   //alert("unique: " + uniqueElements);
-//   return uniqueElements;
-// }
 
 function getUniqueOrDouble(array, doubled) {
     var hash = {}, uniqueChoices = [], doubleChoices = [];
@@ -318,20 +360,12 @@ function getUniqueOrDouble(array, doubled) {
   }
 
 
-
-// function computeCheckRows(){
+// function computeCheckColumns(){
 //   var array = [1,2,3,4,5,6,7,8,9];
 //   for(var i=1;i<10;++i){
-//     checkRows.push(array);
+//     checkColumns.push(array);
 //   }
 // }
-
-function computeCheckColumns(){
-  var array = [1,2,3,4,5,6,7,8,9];
-  for(var i=1;i<10;++i){
-    checkColumns.push(array);
-  }
-}
 
 function checkAgainstNine(array){
     var checkNineArray = [];
@@ -387,20 +421,124 @@ function pushToRows(array, blockNumber){
   if(blockNumber <= 3 ){
     pushFirstBlockRow(array, rows);
   }
+  else if(blockNumber > 3 ){
+    pushSecondBlockRow(array, rows);
+  }
   
 }
 
-function pushFirstBlockRow(array, store){
-  for(var j=0;j<array.length;++j){
-      var rowElement = array[j];
-      if(j<3){var rowNumber = 0;}
-      else{
-        if(j<6){var rowNumber = 1;}
-        else{var rowNumber = 2;}
-      }
-      store[rowNumber].push(rowElement);
+function pushFirstBlockRow(blockRowArray1, store){
+  for(var j=0;j<blockRowArray1.length;++j){
+    var rowElement = blockRowArray1[j];
+    if(j<3){var rowNumber = 0;}
+    else{
+      if(j<6){var rowNumber = 1;}
+      else{var rowNumber = 2;}
     }
+    store[rowNumber].push(rowElement);
+  }
 }
+
+function pushSecondBlockRow(blockRowArray2, store){
+  for(var j=0;j<blockRowArray2.length;++j){
+    var rowElement = blockRowArray2[j];
+    if(j<3){var rowNumber = 3;}
+    else{
+      if(j<6){var rowNumber = 4;}
+      else{var rowNumber = 5;}
+    }
+    store[rowNumber].push(rowElement);
+  }
+}
+
+function showMessage(message){
+    document.getElementById("message1").innerHTML = message;
+}
+
+function visualizeRows(){
+  if(computingRound <= 4){
+    var begin = 0, end = 3;
+  }
+  else if(computingRound > 4){
+    var begin = 3, end = 6;
+  }
+  for(var i=begin;i<end;++i){
+      var ausgabe = "ausgabe" + (i+1);
+      var row = rows[i];
+      document.getElementById(ausgabe).innerHTML = row;
+  }
+}
+
+
+
+// function findSecondBlock(){
+//   var array = [1,2,3,4,5,6,7,8,9], newArray = [];
+//   while(array.length != 0){
+//     var arrayIndex = randomChoice(array);
+//     var arrayElement = array[arrayIndex];
+//     var possibleElements = getPossibleElements(newArray);
+//     //alert("possible after compute: " + possibleElements);
+    
+//     if(possibleElements != undefined){
+//       var cleanedElements = cleanElements(possibleElements, newArray);
+//       for(i=0;i<cleanedElements.length;++i){
+//         var possible = cleanedElements[i];
+//         if(possible == arrayElement){
+//           newArray.push(arrayElement);
+//           array.splice(arrayIndex, 1);
+//         }
+//       }
+//     }
+//     else{
+//       findSecondBlock();
+//     }
+//   }
+//   return newArray;
+// }
+
+// function cleanElements(possibleElements, newArray){
+//   var cleanedElements = possibleElements;
+  
+//   if(newArray.length==5){
+//     cleanArray = [newArray[3], newArray[4]];
+//     for(i=0;i<rows.length;++i){
+//       var row = rows[i];
+//       var checkSame = row.concat(cleanArray);
+//       var uniqueCheckSame = getUniqueOrDouble(checkSame);
+//       if(uniqueCheckSame.length == 1){
+//         var cleanIndex = cleanedElements.indexOf(uniqueCheckSame);
+//         cleanedElements
+//       }
+//     }
+//   }
+//   return cleanedElements;
+// }
+
+
+// function getPossibleElements(newArray){
+//   if(newArray.length < 3){
+//     var possibleElements = checkAgainstNine(rows[0]);
+//   }
+//   else{
+//     var concatElements = concatAndUnique(newArray);
+//     var possibleElements = checkAgainstNine(concatElements);
+//   }
+//   //alert("possible: " + possibleElements);
+//   return possibleElements;
+// }
+
+// function concatAndUnique(newArray){
+//   if(newArray.length < 6){
+//     var concatElements = rows[1].concat(newArray);
+//     var uniqueElements = getUniqueOrDouble(concatElements);
+//   }
+//   else{
+//     var concatElements = rows[2].concat(newArray);
+//     var uniqueElements = getUniqueOrDouble(concatElements);
+//   }
+//   //alert("unique: " + uniqueElements);
+//   return uniqueElements;
+// }
 
 // function deleteFromCheckColumns(blockNumber){
 //   var columnBegin = 0; var columnEnd = 3;
@@ -456,18 +594,3 @@ function pushFirstBlockRow(array, store){
 //     // } 
 //   //}
 // }
-
-function showMessage(message){
-    document.getElementById("message1").innerHTML = message;
-}
-
-function visualizeRows(){
-  if(computingRound <= 4){
-    var begin = 0, end = 3;
-  }
-  for(var i=begin;i<end;++i){
-      var ausgabe = "ausgabe" + (i+1);
-      var row = rows[i];
-      document.getElementById(ausgabe).innerHTML = row;
-  }
-}
