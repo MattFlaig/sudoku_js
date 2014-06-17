@@ -1,6 +1,8 @@
 var computingRound = 1;
 var columns = [];
 var rows = [];
+var blocks = [];
+var checkArray = [];
 //var checkColumns = [];
 //var checkRows = [];
 var fillArray = [];
@@ -25,6 +27,7 @@ function computeFirstBlock(){
   //alert(checkRows); 
   var arrayOfNines = [1,2,3,4,5,6,7,8,9];
   var firstBlock = findRandomArray(arrayOfNines);
+  blocks.push(firstBlock);
   //alert(checkRows); 
   
   var messageFirst = "First Block successfully computed!";
@@ -43,7 +46,7 @@ function computeFirstBlock(){
 function computeSecondBlock(){
   var blockNumber = 2;
   var secondBlock = getNextBlock(blockNumber);
-  
+  blocks.push(secondBlock);
    
    var messageSecond = "Second Block successfully computed!";
    pushToRows(secondBlock, blockNumber);
@@ -59,7 +62,7 @@ function computeSecondBlock(){
 function computeThirdBlock(){
   var blockNumber = 3;
   var thirdBlock = fillWithMissingElements();
-  
+  blocks.push(thirdBlock);
    
    var messageThird = "Third Block successfully computed!";
    pushToRows(thirdBlock, blockNumber);
@@ -76,7 +79,7 @@ function computeFourthBlock(){
   prepareRows(fillArray);
   var blockNumber = 4;
   var fourthBlock = getFourthBlock();
-  
+  blocks.push(fourthBlock);
   
   var messageFourth = "Fourth Block successfully computed!";
   pushToRows(fourthBlock, blockNumber);
@@ -141,31 +144,129 @@ function getNextBlock(blockNumber){
   }
   else if(blockNumber==5){
     var firstTwoLines = compareLinesAndColumns();
-    alert(firstTwoLines);
     
   }
 
 }
 
-function compareLinesAndColumns(){
-  var flag = true;
- 
-  while(flag){
-    var counter = 0, firstTwoLines = getFirstTwoLines();
-    var secondLine = [firstTwoLines[3], firstTwoLines[4], firstTwoLines[5]];
-    var comparisonColumns = [columns[3], columns[4], columns[5]];
-    for(var i=0;i<comparisonColumns.length;++i){
-      var column = comparisonColumns[i];
-      var compareArray = column.push(secondLine[i]);
-      var checkDouble = getUniqueOrDouble(compareArray, doubled=1);
-      if(checkDouble != undefined){
-        counter+=1;
+function compareLinesAndColumns(block){
+
+  for(var i=0;i<9;++i){
+    if(i<3){
+      var possible1 = fillArray[4].concat(fillArray[5]);
+      alert("possible1: " + possible1);
+      var compareArray = getCompareArray(possible1, i+3);
+      checkArray.push(compareArray);
+    }
+    else{
+      if(i<6){
+        var possible2 = fillArray[3].concat(fillArray[5]);
+        var compareArray = getCompareArray(possible2, i);
+        checkArray.push(compareArray);
       }
-      if(i==2 && counter <= 2){flag=false;}
+      else{
+        var possible3 = fillArray[3].concat(fillArray[4]);
+        var compareArray = getCompareArray(possible3, i-3);
+        checkArray.push(compareArray);
+      }
     }
   }
-  return firstTwoLines;
+
+  
+  
+  // var flag = true;
+  // while(flag){
+  //   var firstTwoLines = getFirstTwoLines();
+  //   alert("before: " + firstTwoLines);
+  //   var firstLine = [firstTwoLines[0], firstTwoLines[1], firstTwoLines[2]];
+  //   var secondLine = [firstTwoLines[3], firstTwoLines[4], firstTwoLines[5]];
+  //   var comparisonColumns = [columns[3], columns[4], columns[5]];
+  //   var doubledIndexes = findDoubles(comparisonColumns, firstLine);
+  //   alert("indexes: " + doubledIndexes);
+  //   //if(doubledIndexes.length<3){
+  //     var cleanedFirstLine = changeDoubles(firstLine, doubledIndexes);
+  //     var cleanedLines = cleanedFirstLine.concat(secondLine);
+  //     if(cleanedLines.length == 6){flag = false;}
+  //   //}
+    
+  // } 
+  //return cleanedLines;
 }
+
+
+
+function getCompareArray(possible, columnNumber){
+  var column = columns[columnNumber];
+  alert("column: " + column);
+  for(var l = 0; l<possible.length;++l){
+    var possibleItem = possible[l];
+    for(var k = 0; k<column.length;++k){
+      var columnItem = column[k];
+    
+      if(columnItem==possibleItem){
+        possible.splice(l,1);
+      }
+    }
+  }
+  alert("possible: " + possible);
+  return possible;
+}
+
+// function changeDoubles(line, doubledIndexes){
+
+//   if(doubledIndexes != []){
+//     for(var i=0; i<doubledIndexes.length; ++i){
+//     var index = doubledIndexes[i];
+//       if(doubledIndexes.length == 1){ 
+//         if(index <= 1){
+//           line.splice(index,2,line[i+1], line[index]);
+//         }
+//         else{
+//           line.splice((index-1),2,line[index], line[index+1]);
+//         }
+//       }
+//       else if(doubledIndexes.length == 2){
+//         if(index == 1 || (index+1)==1){
+//           line.splice(index,2,line[index+1], line[index]);
+//         }
+//         // else if(index == doubledIndexes[index+1]){
+
+//         // }
+        
+//         else{
+//           line.splice(index,3,line[index+2], line[index+1], line[index]);
+//         }
+//       }
+//       // else{
+        
+
+//       // }
+//     }
+//   }
+//   alert("line:" + line);
+//   return line;
+// }
+
+// function findDoubles(comparisonColumns, line){
+//   var indexArray = [];
+//   for(var i=0;i<comparisonColumns.length;++i){
+//     var column = comparisonColumns[i];
+//     //for(var j=0;j<line.length;++j){
+//       //var lineElement = line[j];
+
+    
+//       var lineArray = [line[i]];
+//       var compareArray = column.concat(lineArray);
+//       var checkDouble = getUniqueOrDouble(compareArray, doubled=1);
+//       if(checkDouble != undefined){
+//         indexArray.push(i);
+//         //counter+=1;
+//       }
+//     //}
+//     //if(i==2 && counter <= 2){flag=false;}
+//   }
+//    return indexArray;
+// }
 
 function getFirstTwoLines(){
   var lines = [];
