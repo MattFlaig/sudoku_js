@@ -95,16 +95,16 @@ function computeFourthBlock(){
 function computeFifthBlock(){
   var blockNumber = 5;
   var fifthBlock = getNextBlock(blockNumber);
+  blocks.push(fifthBlock);
   
-  
-  // var messageFifth = "Fifth Block successfully computed!";
-  // pushToRows(fifthBlock, blockNumber);
-  // pushToColumns(fifthBlock, blockNumber);
+  var messageFifth = "Fifth Block successfully computed!";
+  pushToRows(fifthBlock, blockNumber);
+  pushToColumns(fifthBlock, blockNumber);
 
-  // showMessage(messageFifth);//alert(secondBlock);
-  // computingRound += 1;
-  // pushSecondBlockRow(fifthBlock, fillArray);
-  //visualizeRows();
+  showMessage(messageFifth);//alert(secondBlock);
+  computingRound += 1;
+  pushSecondBlockRow(fifthBlock, fillArray);
+  visualizeRows();
 }
 
 
@@ -143,18 +143,63 @@ function getNextBlock(blockNumber){
     return allLines;
   }
   else if(blockNumber==5){
-    var firstTwoLines = compareLinesAndColumns();
-    
+    compareLinesAndColumns();
+    var beginIndex = 0;
+    var firstLine = getLine(0,3);
+    var secondLine = getLine(3,6,firstLine);
+    var twoLines = firstLine.concat(secondLine);
+    //alert("nextBlock: " + threeLines);
+    return twoLines;
   }
+}
 
+function getLine(begin, end, oldLine){
+  var line = [];
+ 
+    for(var i = begin; i<end;++i){
+      var possibleFields = checkArray[i];
+      if(i<4){
+      var field = getOneByRandom(possibleFields);
+      }
+      else{
+      var field = checkLastRow(possibleFields, line, oldLine)
+      }
+    //alert(field);
+      line.push(field);
+      var deletion = manageDeletion(field);
+    }
+    
+  
+  return line;
+  
+}
+
+function checkLastRow(possibleFields, line, oldLine){
+  var concatLine = line.concat(oldLine);
+  var concatLast = concatLine.concat(fillArray[5]);
+  var checkDouble = getUniqueOrDouble(concatLast, doubled=1);
+}
+
+function manageDeletion(field){
+  for(i=0;i<checkArray.length;++i){
+    var check = checkArray[i];
+    for(j=0;j<check.length;++j){
+      var possibleDelete = check[j];
+      if(field == possibleDelete){
+        check.splice(j,1);
+      }
+    }
+  }
+  return "done";
 }
 
 function compareLinesAndColumns(block){
+  checkArray = [];
 
   for(var i=0;i<9;++i){
     if(i<3){
       var possible1 = fillArray[4].concat(fillArray[5]);
-      alert("possible1: " + possible1);
+      //alert("possible1: " + possible1);
       var compareArray = getCompareArray(possible1, i+3);
       checkArray.push(compareArray);
     }
@@ -171,33 +216,13 @@ function compareLinesAndColumns(block){
       }
     }
   }
-
-  
-  
-  // var flag = true;
-  // while(flag){
-  //   var firstTwoLines = getFirstTwoLines();
-  //   alert("before: " + firstTwoLines);
-  //   var firstLine = [firstTwoLines[0], firstTwoLines[1], firstTwoLines[2]];
-  //   var secondLine = [firstTwoLines[3], firstTwoLines[4], firstTwoLines[5]];
-  //   var comparisonColumns = [columns[3], columns[4], columns[5]];
-  //   var doubledIndexes = findDoubles(comparisonColumns, firstLine);
-  //   alert("indexes: " + doubledIndexes);
-  //   //if(doubledIndexes.length<3){
-  //     var cleanedFirstLine = changeDoubles(firstLine, doubledIndexes);
-  //     var cleanedLines = cleanedFirstLine.concat(secondLine);
-  //     if(cleanedLines.length == 6){flag = false;}
-  //   //}
-    
-  // } 
-  //return cleanedLines;
 }
 
 
 
 function getCompareArray(possible, columnNumber){
   var column = columns[columnNumber];
-  alert("column: " + column);
+  //alert("column: " + column);
   for(var l = 0; l<possible.length;++l){
     var possibleItem = possible[l];
     for(var k = 0; k<column.length;++k){
@@ -208,7 +233,7 @@ function getCompareArray(possible, columnNumber){
       }
     }
   }
-  alert("possible: " + possible);
+  //alert("possible: " + possible);
   return possible;
 }
 
@@ -329,6 +354,7 @@ function getThirdField(lines, first){
 }
 
 function getOneByRandom(array){
+  //alert("array: " + array);
   var arrayIndex = Math.floor(Math.random() * array.length);
   var arrayElement = array[arrayIndex];
   return arrayElement;
