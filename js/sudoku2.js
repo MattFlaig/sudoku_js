@@ -144,12 +144,14 @@ function getNextBlock(blockNumber){
   }
   else if(blockNumber==5){
     compareLinesAndColumns();
-    var beginIndex = 0;
     var firstLine = getLine(0,3);
     var secondLine = getLine(3,6,firstLine);
     var twoLines = firstLine.concat(secondLine);
+    var thirdLine = getLine(6,9);
+    var threeLines = thirdLine.concat(twoLines);
+    
     //alert("nextBlock: " + threeLines);
-    return twoLines;
+    return firstLine;
   }
 }
 
@@ -159,12 +161,23 @@ function getLine(begin, end, oldLine){
     for(var i = begin; i<end;++i){
       var possibleFields = checkArray[i];
       if(i<4){
-      var field = getOneByRandom(possibleFields);
+        //alert("possible fields: " + possibleFields);
+        var field = getOneByRandom(possibleFields);
+        //alert("field: " + field);
       }
       else{
-      var field = checkLastRow(possibleFields, line, oldLine)
+        if(i<6){
+          var possibleFromLast = checkLastRow(possibleFields, line, oldLine)
+           //alert("possible from last row: " + possibleFromLast);
+          if(possibleFromLast != undefined){
+            var field = getOneByRandom(possibleFromLast);
+          }
+          else{var field = getOneByRandom(possibleFields);}
+        }
+        else{
+          var field = getOneByRandom(possibleFields);
+        }
       }
-    //alert(field);
       line.push(field);
       var deletion = manageDeletion(field);
     }
@@ -176,8 +189,25 @@ function getLine(begin, end, oldLine){
 
 function checkLastRow(possibleFields, line, oldLine){
   var concatLine = line.concat(oldLine);
-  var concatLast = concatLine.concat(fillArray[5]);
+  var lastLine = fillArray[5];
+  var concatLast = concatLine.concat(lastLine);
   var checkDouble = getUniqueOrDouble(concatLast, doubled=1);
+  if(checkDouble != undefined && checkDouble.length <= 2){
+    var chooseFromLastLine = []; 
+    for(var i=0;i<lastLine.length;++i){
+      var lastLineElement = lastLine[i];var counter = 0;
+      for(var j=0;j<concatLine.length;++j){
+        var alreadyChosen = concatLine[j];//alert(alreadyChosen);
+        if(lastLineElement!=alreadyChosen){
+          counter += 1;
+          if(counter==concatLine.length){
+            chooseFromLastLine.push(lastLineElement);
+          }
+        }
+      }
+    }
+  }
+  return chooseFromLastLine;
 }
 
 function manageDeletion(field){
@@ -201,39 +231,58 @@ function compareLinesAndColumns(block){
       var possible1 = fillArray[4].concat(fillArray[5]);
       //alert("possible1: " + possible1);
       var compareArray = getCompareArray(possible1, i+3);
-      checkArray.push(compareArray);
+      var comparedWithFirst = deleteFromRow(compareArray, fillArray[3]);
+      checkArray.push(comparedWithFirst);
     }
     else{
       if(i<6){
         var possible2 = fillArray[3].concat(fillArray[5]);
         var compareArray = getCompareArray(possible2, i);
-        checkArray.push(compareArray);
+        var comparedWithSecond = deleteFromRow(compareArray, fillArray[4]);
+        checkArray.push(comparedWithSecond);
       }
       else{
         var possible3 = fillArray[3].concat(fillArray[4]);
         var compareArray = getCompareArray(possible3, i-3);
-        checkArray.push(compareArray);
+        var comparedWithThird = deleteFromRow(compareArray, fillArray[5]);
+        checkArray.push(comparedWithThird);
       }
     }
   }
 }
 
 
+function deleteFromRow(compareArray, compareLine){
+  
+  for(var i=0; i<compareArray.length;++i){
+    var compareElement = compareArray[i];
+    for(var j=0;j<compareLine.length;++j){
+      var lineElement = compareLine[j];
+      if(compareElement==lineElement){
+        alert("delete: " + compareElement);
+        compareArray.splice(i,1);
+      }
+    }
+  }
+  alert("compareArray: " + compareArray);
+  return compareArray;
+}
+
 
 function getCompareArray(possible, columnNumber){
   var column = columns[columnNumber];
-  //alert("column: " + column);
+  alert("column: " + column);
   for(var l = 0; l<possible.length;++l){
     var possibleItem = possible[l];
     for(var k = 0; k<column.length;++k){
       var columnItem = column[k];
     
-      if(columnItem==possibleItem){
+      if(columnItem == possibleItem){
         possible.splice(l,1);
       }
     }
   }
-  //alert("possible: " + possible);
+  alert("possible: " + possible);
   return possible;
 }
 
