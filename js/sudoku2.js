@@ -1,6 +1,8 @@
 var computingRound = 1;
 var columns = [];
 var rows = [];
+var blocks = [];
+var checkArray = [];
 //var checkColumns = [];
 //var checkRows = [];
 var fillArray = [];
@@ -13,17 +15,21 @@ function manageComputation(){
   computeFirstBlock();
   computeSecondBlock();
   computeThirdBlock();
+  computeFourthBlock();
+  computeFifthBlock();
 }
 
 
 
 function computeFirstBlock(){
   prepareRows(fillArray);
+  var blockNumber = 1;
   //alert(checkRows); 
   var arrayOfNines = [1,2,3,4,5,6,7,8,9];
   var firstBlock = findRandomArray(arrayOfNines);
+  blocks.push(firstBlock);
   //alert(checkRows); 
-  var blockNumber = 1;
+  
   var messageFirst = "First Block successfully computed!";
   pushToRows(firstBlock, blockNumber);
   //alert(checkRows); 
@@ -38,9 +44,10 @@ function computeFirstBlock(){
 }
 
 function computeSecondBlock(){
-  var secondBlock = getNextBlock();
-  
-   var blockNumber = 2;
+  var blockNumber = 2;
+  var secondBlock = getNextBlock(blockNumber);
+  blocks.push(secondBlock);
+   
    var messageSecond = "Second Block successfully computed!";
    pushToRows(secondBlock, blockNumber);
    pushToColumns(secondBlock, blockNumber);
@@ -53,9 +60,10 @@ function computeSecondBlock(){
 }
 
 function computeThirdBlock(){
+  var blockNumber = 3;
   var thirdBlock = fillWithMissingElements();
-  
-   var blockNumber = 3;
+  blocks.push(thirdBlock);
+   
    var messageThird = "Third Block successfully computed!";
    pushToRows(thirdBlock, blockNumber);
    pushToColumns(thirdBlock, blockNumber);
@@ -67,12 +75,44 @@ function computeThirdBlock(){
    visualizeRows();
 }
 
+function computeFourthBlock(){
+  prepareRows(fillArray);
+  var blockNumber = 4;
+  var fourthBlock = getFourthBlock();
+  blocks.push(fourthBlock);
+  
+  var messageFourth = "Fourth Block successfully computed!";
+  pushToRows(fourthBlock, blockNumber);
+  pushToColumns(fourthBlock, blockNumber);
+
+  showMessage(messageFourth);//alert(secondBlock);
+  computingRound += 1;
+  //alert("fourthBlock: " + fourthBlock);
+  pushSecondBlockRow(fourthBlock, fillArray);
+  visualizeRows();
+}
+
+function computeFifthBlock(){
+  var blockNumber = 5;
+  var fifthBlock = getNextBlock(blockNumber);
+  blocks.push(fifthBlock);
+  
+  var messageFifth = "Fifth Block successfully computed!";
+  pushToRows(fifthBlock, blockNumber);
+  pushToColumns(fifthBlock, blockNumber);
+
+  showMessage(messageFifth);//alert(secondBlock);
+  computingRound += 1;
+  pushSecondBlockRow(fifthBlock, fillArray);
+  visualizeRows();
+}
 
 
-function prepareRows(array){
+
+function prepareRows(prepareArray){
   for(var i=0;i<9;++i){
     var emptyArray = [];
-    array.push(emptyArray);
+    prepareArray.push(emptyArray);
   }
 }
 
@@ -96,21 +136,452 @@ function findRandomArray(array){
   return newArray;
 }
 
-function getNextBlock(){
-  //var nextBlock = [];
-  //var stillThere = fillArray[0].concat(fillArray[1]);
-  var firstTwoLines = getFirstTwoLines();
-  var allLines = insertLastLine(firstTwoLines);
-  return allLines;
-  //alert(firstTwoLines);
-
+function getNextBlock(blockNumber){
+  if(blockNumber==2){
+    var firstTwoLines = getFirstTwoLines();
+    var allLines = insertLastLine(firstTwoLines);
+    return allLines;
+  }
+  else if(blockNumber==5){
+    var marker = true;
+    while(marker){
+      //alert("looping...");
+      compareLinesAndColumns();
+      var firstLine = getLine(0,3);
+      var secondLine = getLine(3,6);
+      var twoLines = firstLine.concat(secondLine);
+      
+      
+      var thirdLine = getLine(6,9, twoLines);
+      var checkCorrect = scrutinizeThird(thirdLine);
+      if(checkCorrect == undefined){
+        marker=false;//break;
+      }
+    }
+    var threeLines = twoLines.concat(thirdLine);
+    return threeLines;
+    //alert("nextBlock: " + threeLines);
+    
+  }
 }
+
+function scrutinizeThird(thirdLine){
+  alert("scrutinize!");
+  var counter = 0;
+  var scrutinizer = "";
+  for(var i=0;i<thirdLine.length;++i){
+    var thirdLineElement = thirdLine[i];
+    alert("third: " + thirdLineElement);
+    if(thirdLineElement == undefined){
+      counter += 1;
+      //alert("counter " + counter);
+      if(i==2 && counter>0){
+        alert("not correct!");
+        scrutinizer = "notcorrect"; break;
+      }
+    }
+  }
+  if(scrutinizer != ""){return scrutinizer;}
+  else{return undefined;}
+}
+
+function getLine(begin, end, oldLines){
+  var line = [];
+ 
+    for(var i = begin; i<end;++i){
+      var possibleFields = checkArray[i];
+      if(i<3){
+        //alert("possible fields: " + possibleFields);
+        var field = getOneByRandom(possibleFields);
+        //alert("field: " + field);
+      }
+      else{
+        if(i<6){
+          var checkLastLine = getPossibleFromLastLine(possibleFields);
+          if(checkLastLine == undefined){var field = getOneByRandom(possibleFields);}
+          else{var field = parseInt(checkLastLine);}
+          
+        }
+        else{
+          var remainingNumbers = checkAgainstNine(oldLines);
+          var doubledRemaining = getPotentialDoubleOccurrence(remainingNumbers);
+          //alert("doubledRemaining: " + doubledRemaining);
+          if(doubledRemaining == undefined){
+            var lastLineNumbers = getRemainingLine(remainingNumbers, possibleFields);
+            var field = getOneByRandom(lastLineNumbers);
+          }
+          else{
+            //alert("doubles!");
+            var columnIndex = doubledRemaining[2];
+            //alert("index: " + columnIndex);
+            var specialElement = findSpecialElement(remainingNumbers, doubledRemaining);
+            var deleteIndex = remainingNumbers.indexOf(specialElement);
+            remainingNumbers.splice(deleteIndex,1);
+            if(i==columnIndex){var field = specialElement;}
+            else{
+              var lastLineNumbers = getRemainingLine(remainingNumbers, possibleFields);
+              var field = getOneByRandom(lastLineNumbers);
+            }
+
+          }
+          // alert("possible fields: " + possibleFields);
+          
+           //alert("field in last Row:" + field);
+        }
+      }
+      // else{
+      //   if(i<6){
+      //     var possibleFromLast = checkLastRow(possibleFields, oldLine, line);
+      //      //alert("possible from last row: " + possibleFromLast);
+      //     if(possibleFromLast != undefined && i == 3){
+      //       //alert("possible from last 4: " + possibleFromLast);
+      //       var possibleField = chooseFromLast(possibleFromLast);
+      //       //alert("possible choose: " + possibleField);
+      //       if(possibleField == undefined){var field = getOneByRandom(possibleFields);/*alert("chosen field: " + field);*/}
+      //       else if(possibleField.length == 1){var field = possibleField; /*alert("Haha");*/}
+      //       else{var field = getOneByRandom(possibleFromLast);/*alert("hoho");*/}
+      //     }
+      //     else if(possibleFromLast != undefined && i == 4){
+      //       //alert("possible from last 5: " + possibleFromLast);
+      //       var fieldIndex = getLastField(possibleFromLast);
+      //       if(fieldIndex == 4){var field = possibleFromLast[0];}
+      //       else{var field = getOneByRandom(possibleFields);}
+      //     }
+      //     else if(possibleFromLast != undefined && i == 5){
+      //       //alert("possible from last 6: " + possibleFromLast);
+      //       var fieldIndex = getLastField(possibleFromLast);
+      //       if(fieldIndex == 5){var field = possibleFromLast[0];}
+      //       else{var field = getOneByRandom(possibleFields);}
+      //     }
+      //     else{var field = getOneByRandom(possibleFields);}  
+      //   }
+      //   else{
+      //     var field = getOneByRandom(possibleFields);
+      //   }
+      // }
+      line.push(field);
+      var deletion = manageDeletion(field);
+    }
+    
+  
+  return line;
+  
+}
+function findSpecialElement(remainingNumbers, doubledRemaining){
+  var specialElement = "";
+  //var column = columns[columnIndex];
+  var onlyDoubles = [doubledRemaining[0], doubledRemaining[1]];
+  for(var i=0;i<onlyDoubles.length;++i){
+    var counter = 0; var doubleElement = onlyDoubles[i];
+    for(var j=0;j<remainingNumbers.length;++j){
+      var remainElement = remainingNumbers[j];
+      if(remainElement==doubleElement){
+        counter+=1;
+      }
+    }
+    if(counter == 0){specialElement = remainElement;}
+  }
+  return specialElement;
+}
+
+function getPossibleFromLastLine(possibleFields){
+  var nextField = " ";
+  var lastLine = fillArray[5];
+  for(var i=0;i<lastLine.length;++i){
+    var lineElement = lastLine[i];
+    for(var j=0;j<possibleFields.length;++j){
+      var field = possibleFields[j];
+      if(lineElement==field){nextField = lineElement;break;}
+    }
+  }
+  
+  if(nextField != " "){alert(nextField);return nextField;}
+  //else{return undefined;}
+  
+}
+
+function getRemainingLine(remainingNumbers, possibleFields){
+  var possibleRemaining = [];
+  for(var i=0;i<remainingNumbers.length;++i){
+    var lineElement = remainingNumbers[i];
+    for(var j=0;j<possibleFields.length;++j){
+      var fieldElement = possibleFields[j];
+      if(lineElement==fieldElement){possibleRemaining.push(lineElement);}
+    }
+  }
+  return possibleRemaining;
+}
+
+function getPotentialDoubleOccurrence(remainingNumbers){
+  var checkColumns = [columns[3], columns[4], columns[5]];
+  //var doubleIndex = [];
+  var doubledInColumn = [];
+  for(i=0;i<checkColumns.length;++i){
+    var column = checkColumns[i];
+    var concatRemaining = remainingNumbers.concat(column[i]);
+    var checkDouble = getUniqueOrDouble(concatRemaining, doubled=1);
+    //alert("checkDouble: " + checkDouble);
+    if(checkDouble != undefined){
+      if(checkDouble.length == 2){
+        doubledInColumn.push(checkDouble[0], checkDouble[1], i+6);
+      }
+    }
+  }
+  if(doubledInColumn.length > 1){
+    return doubledInColumn; 
+  }
+  else{return undefined;}
+}
+// function chooseFromLast(possibleFromLast){
+//   if(possibleFromLast.length == 2){
+//     var concatLast = columns[3].concat(possibleFromLast);
+//     var concatDouble = getUniqueOrDouble(concatLast, doubled=1);
+//     if(concatDouble != undefined){
+//       if(concatDouble.length == 1){
+//         var deleteIndex = possibleFromLast.indexOf(concatDouble);
+//         possibleFromLast.splice(deleteIndex, 1);
+//       } 
+//       else if(concatDouble.length == 2){
+//         possibleFromLast.splice(0, 2);
+//       }
+//     } 
+//   }
+//   else{
+//     var concatLast = columns[3].concat(possibleFromLast);
+//     var concatDouble = getUniqueOrDouble(concatLast, doubled=1);
+//     if(concatDouble != undefined){
+//       if(concatDouble.length == 1){
+//         possibleFromLast.splice(0, 1);
+//       }
+//     }
+//   }
+//   if(possibleFromLast.length == 2){return possibleFromLast;}
+//   else if(possibleFromLast.length == 1){return possibleFromLast;}
+//   else{return undefined;}
+  
+// }
+
+// function getLastField(possibleFromLast){
+  
+//   var checkColumns = [columns[4], columns[5]];
+//   var possibleColumnIndex = "";
+//   for(var i=4;i<6;++i){
+//     var column = columns[i];
+//     var possibleFromLastArray = [possibleFromLast];
+//     var concatLast = column.concat(possibleFromLastArray);
+//     var doubledLast = getUniqueOrDouble(concatLast, doubled=1);
+//     if(doubledLast == undefined){
+//       possibleColumnIndex = i;break;
+//     }
+//   }
+//   return possibleColumnIndex;
+// }
+
+// function checkLastRow(possibleFields, oldLine, line){
+//   if(line.length > 0){var concatLine = line.concat(oldLine);}
+//   else{var concatLine = oldLine;}
+//   var lastLine = fillArray[5];
+//   var concatLast = concatLine.concat(lastLine);
+//   var checkDouble = getUniqueOrDouble(concatLast, doubled=1);
+//   if(checkDouble != undefined && checkDouble.length <= 2){
+//     var chooseFromLastLine = []; 
+//     for(var i=0;i<lastLine.length;++i){
+//       var lastLineElement = lastLine[i];var counter = 0;
+//       for(var j=0;j<concatLine.length;++j){
+//         var alreadyChosen = concatLine[j];
+//         if(lastLineElement!=alreadyChosen){
+//           counter += 1;
+//           if(counter==concatLine.length){
+//             chooseFromLastLine.push(lastLineElement);
+//           }
+//         }
+//       }
+//     }
+//   }
+//   if(chooseFromLastLine != undefined){
+//     if(chooseFromLastLine.length > 0){return chooseFromLastLine;}
+//     else{return undefined;}
+//   }
+//   else{return undefined;}
+// }
+
+function manageDeletion(field){
+  for(i=0;i<checkArray.length;++i){
+    var check = checkArray[i];
+    for(j=0;j<check.length;++j){
+      var possibleDelete = check[j];
+      if(field == possibleDelete){
+        check.splice(j,1);
+      }
+    }
+  }
+  //return "done";
+}
+
+function compareLinesAndColumns(){
+  checkArray = [];
+
+  for(var i=0;i<9;++i){
+    if(i<3){
+      var possible1 = fillArray[4].concat(fillArray[5]);
+      if(i==0){var possible2 = columns[4].concat(columns[5]);}
+      else if(i==1){var possible2 = columns[3].concat(columns[5]);} 
+      else{var possible2 = columns[3].concat(columns[4]);}  
+      var concatPossible = possible1.concat(possible2);
+      
+      var compareArray = getUniqueOrDouble(concatPossible, doubled=1);
+      // var compareArray = getCompareArray(possible1, i+3);
+      // //alert("compareArray: " + compareArray);
+      // var comparedWithFirst = deleteFromRow(compareArray, fillArray[3]);
+      checkArray.push(compareArray);
+      //alert("compare1: " + comparedWithFirst);
+    }
+    else{
+      if(i<6){
+        var possible1 = fillArray[3].concat(fillArray[5]);
+        if(i==3){var possible2 = columns[4].concat(columns[5]);}
+        else if(i==4){var possible2 = columns[3].concat(columns[5]);} 
+        else{var possible2 = columns[3].concat(columns[4]);}  
+        var concatPossible = possible1.concat(possible2);
+      
+        var compareArray = getUniqueOrDouble(concatPossible, doubled=1);
+
+
+        //var row2 = fillArray[4];
+        // var compareArray = getCompareArray(possible2, i);
+        // var comparedWithSecond = deleteFromRow(compareArray, fillArray[4]);
+        checkArray.push(compareArray);
+        //alert("compare2: " + comparedWithSecond);
+      }
+      else{
+        var possible1 = fillArray[3].concat(fillArray[4]);
+        if(i==6){var possible2 = columns[4].concat(columns[5]);}
+        else if(i==7){var possible2 = columns[3].concat(columns[5]);} 
+        else{var possible2 = columns[3].concat(columns[4]);}  
+        var concatPossible = possible1.concat(possible2);
+      
+        var compareArray = getUniqueOrDouble(concatPossible, doubled=1);
+
+        checkArray.push(compareArray);
+
+      }
+    }
+    //   else{
+    //     var possible3 = fillArray[3].concat(fillArray[4]);
+    //     var compareArray = getCompareArray(possible3, i-3);
+    //     var comparedWithThird = deleteFromRow(compareArray, fillArray[5]);
+    //     checkArray.push(comparedWithThird);
+    //   }
+    // }
+  }
+}
+
+
+// function deleteFromRow(compareArray, compareLine){
+//   //alert("compareArray before: " + compareArray);
+//   for(var i=0; i<compareArray.length;++i){
+//     var compareElement = compareArray[i];
+//     for(var j=0;j<compareLine.length;++j){
+//       var lineElement = compareLine[j];
+//       if(compareElement==lineElement){
+//         //alert("delete: " + compareElement);
+//         compareArray.splice(i,1);
+//       }
+//     }
+//   }
+//   //alert("compareArray: " + compareArray);
+//   return compareArray;
+// }
+
+
+// function getCompareArray(possible, columnNumber){
+//   var flag = true;
+//   while(flag){
+//     var column = columns[columnNumber];
+//     //alert("column: " + column);
+//     for(var l = 0; l<possible.length;++l){
+//       var possibleItem = possible[l];
+//       for(var k = 0; k<column.length;++k){
+//         var columnItem = column[k];
+//         if(columnItem == possibleItem){
+//           possible.splice(l,1);
+//         }
+//       }
+//     }
+//     var recursiveCompare = column.concat(possible);
+//     var recursiveDoubled = getUniqueOrDouble(recursiveCompare, doubled=1);
+//     if(recursiveDoubled==undefined){
+//       flag = false; break;
+//     }
+//   }
+//   return possible;
+// }
+
+// function changeDoubles(line, doubledIndexes){
+
+//   if(doubledIndexes != []){
+//     for(var i=0; i<doubledIndexes.length; ++i){
+//     var index = doubledIndexes[i];
+//       if(doubledIndexes.length == 1){ 
+//         if(index <= 1){
+//           line.splice(index,2,line[i+1], line[index]);
+//         }
+//         else{
+//           line.splice((index-1),2,line[index], line[index+1]);
+//         }
+//       }
+//       else if(doubledIndexes.length == 2){
+//         if(index == 1 || (index+1)==1){
+//           line.splice(index,2,line[index+1], line[index]);
+//         }
+//         // else if(index == doubledIndexes[index+1]){
+
+//         // }
+        
+//         else{
+//           line.splice(index,3,line[index+2], line[index+1], line[index]);
+//         }
+//       }
+//       // else{
+        
+
+//       // }
+//     }
+//   }
+//   alert("line:" + line);
+//   return line;
+// }
+
+// function findDoubles(comparisonColumns, line){
+//   var indexArray = [];
+//   for(var i=0;i<comparisonColumns.length;++i){
+//     var column = comparisonColumns[i];
+//     //for(var j=0;j<line.length;++j){
+//       //var lineElement = line[j];
+
+    
+//       var lineArray = [line[i]];
+//       var compareArray = column.concat(lineArray);
+//       var checkDouble = getUniqueOrDouble(compareArray, doubled=1);
+//       if(checkDouble != undefined){
+//         indexArray.push(i);
+//         //counter+=1;
+//       }
+//     //}
+//     //if(i==2 && counter <= 2){flag=false;}
+//   }
+//    return indexArray;
+// }
 
 function getFirstTwoLines(){
   var lines = [];
   if(computingRound == 2){
     var stillThere = fillArray[0].concat(fillArray[1]);
     var first = fillArray[0], second = fillArray[1];
+  }
+  else if(computingRound == 5){
+    var stillThere = fillArray[3].concat(fillArray[4]);
+    var first = fillArray[3], second = fillArray[4];
   }
   lines = getfirstTwoFields(second, stillThere);
   var thirdField = getThirdField(lines, first);
@@ -121,12 +592,12 @@ function getFirstTwoLines(){
   return lines;
 }
 
-function updateStillThere(lines, stillThere){
-  for(var i = 0; i<lines.length;++i){
-    var lineElement = lines[i];
+function updateStillThere(updateArray, stillThere){
+  for(var i = 0; i<updateArray.length;++i){
+    var arrayElement = updateArray[i];
     for(var j=0; j<stillThere.length;++j){
       stillThereElement = stillThere[j];
-      if(lineElement == stillThereElement){
+      if(arrayElement == stillThereElement){
         stillThere.splice(j,1);
       }
     }
@@ -163,6 +634,7 @@ function getThirdField(lines, first){
 }
 
 function getOneByRandom(array){
+  //alert("array: " + array);
   var arrayIndex = Math.floor(Math.random() * array.length);
   var arrayElement = array[arrayIndex];
   return arrayElement;
@@ -225,83 +697,60 @@ function fillWithMissingElements(){
   return thirdBlock;
 }
 
+function getFourthBlock(){
+  var block = [];
+  var flag = true;
+  while(flag==true){
+    for(var i=1;i<10;++i){
+      var indexNumber = i % 3;
+      if(indexNumber==0){var columnNumber = 2;}
+      else{var columnNumber = indexNumber - 1;}
+      var stillPossible = checkAgainstNine(columns[columnNumber]);
+      if(block != []){
+        stillPossible = updateStillThere(block, stillPossible);
+      }
+      var nextElement = getOneByRandom(stillPossible);
+      block.push(nextElement);
+      if(block.length == 9){
+        var endCheck = checkAgainstNine(block);
+        if(endCheck == undefined){flag=false; break;}
+        else{block = [];}
+      }
+    }
+  }
+  return block;
+}
 
+// function getFifthBlock(){
+//   var fifthBlock = [];
+//   for(var i=1;i<10;++i){
+//     var indexNumber = (i % 3);
+//     if(indexNumber==0){var addingNumber = 5;}
+//     else{var addingNumber = 2;}
 
-
-
-
-// function findSecondBlock(){
-//   var array = [1,2,3,4,5,6,7,8,9], newArray = [];
-//   while(array.length != 0){
-//     var arrayIndex = randomChoice(array);
-//     var arrayElement = array[arrayIndex];
-//     var possibleElements = getPossibleElements(newArray);
-//     //alert("possible after compute: " + possibleElements);
+//     var stillPossibleColumn = checkAgainstNine(columns[indexNumber+addingNumber]);
+//     var stillPossibleRow = checkAgainstNine(rows[indexNumber+addingNumber]);
+//     var rowColumn = stillPossibleRow.concat(stillPossibleColumn);
+//     var possibleTotal = getUniqueOrDouble(rowColumn, doubled=1);
     
-//     if(possibleElements != undefined){
-//       var cleanedElements = cleanElements(possibleElements, newArray);
-//       for(i=0;i<cleanedElements.length;++i){
-//         var possible = cleanedElements[i];
-//         if(possible == arrayElement){
-//           newArray.push(arrayElement);
-//           array.splice(arrayIndex, 1);
-//         }
-//       }
+//     if(fifthBlock != []){
+//       possibleTotal = updateStillThere(fifthBlock, possibleTotal);
 //     }
-//     else{
-//       findSecondBlock();
-//     }
+//     var nextElement = getOneByRandom(possibleTotal);
+//     fifthBlock.push(nextElement);
 //   }
-//   return newArray;
+//   alert(fifthBlock);
+//   return fifthBlock;
 // }
 
-// function cleanElements(possibleElements, newArray){
-//   var cleanedElements = possibleElements;
-  
-//   if(newArray.length==5){
-//     cleanArray = [newArray[3], newArray[4]];
-//     for(i=0;i<rows.length;++i){
-//       var row = rows[i];
-//       var checkSame = row.concat(cleanArray);
-//       var uniqueCheckSame = getUniqueOrDouble(checkSame);
-//       if(uniqueCheckSame.length == 1){
-//         var cleanIndex = cleanedElements.indexOf(uniqueCheckSame);
-//         cleanedElements
-//       }
-//     }
-//   }
-//   return cleanedElements;
-// }
+
+
 
 function randomChoice(array){
   var arrayIndex = Math.floor(Math.random() * array.length);
   return arrayIndex;
 }
 
-// function getPossibleElements(newArray){
-//   if(newArray.length < 3){
-//     var possibleElements = checkAgainstNine(rows[0]);
-//   }
-//   else{
-//     var concatElements = concatAndUnique(newArray);
-//     var possibleElements = checkAgainstNine(concatElements);
-//   }
-//   //alert("possible: " + possibleElements);
-//   return possibleElements;
-// }
-
-// function concatAndUnique(newArray){
-//   if(newArray.length < 6){
-//     var concatElements = rows[1].concat(newArray);
-//     var uniqueElements = getUniqueOrDouble(concatElements);
-//   }
-//   else{
-//     var concatElements = rows[2].concat(newArray);
-//     var uniqueElements = getUniqueOrDouble(concatElements);
-//   }
-//   //alert("unique: " + uniqueElements);
-//   return uniqueElements;
-// }
 
 function getUniqueOrDouble(array, doubled) {
     var hash = {}, uniqueChoices = [], doubleChoices = [];
@@ -318,20 +767,12 @@ function getUniqueOrDouble(array, doubled) {
   }
 
 
-
-// function computeCheckRows(){
+// function computeCheckColumns(){
 //   var array = [1,2,3,4,5,6,7,8,9];
 //   for(var i=1;i<10;++i){
-//     checkRows.push(array);
+//     checkColumns.push(array);
 //   }
 // }
-
-function computeCheckColumns(){
-  var array = [1,2,3,4,5,6,7,8,9];
-  for(var i=1;i<10;++i){
-    checkColumns.push(array);
-  }
-}
 
 function checkAgainstNine(array){
     var checkNineArray = [];
@@ -387,20 +828,124 @@ function pushToRows(array, blockNumber){
   if(blockNumber <= 3 ){
     pushFirstBlockRow(array, rows);
   }
+  else if(blockNumber > 3 ){
+    pushSecondBlockRow(array, rows);
+  }
   
 }
 
-function pushFirstBlockRow(array, store){
-  for(var j=0;j<array.length;++j){
-      var rowElement = array[j];
-      if(j<3){var rowNumber = 0;}
-      else{
-        if(j<6){var rowNumber = 1;}
-        else{var rowNumber = 2;}
-      }
-      store[rowNumber].push(rowElement);
+function pushFirstBlockRow(blockRowArray1, store){
+  for(var j=0;j<blockRowArray1.length;++j){
+    var rowElement = blockRowArray1[j];
+    if(j<3){var rowNumber = 0;}
+    else{
+      if(j<6){var rowNumber = 1;}
+      else{var rowNumber = 2;}
     }
+    store[rowNumber].push(rowElement);
+  }
 }
+
+function pushSecondBlockRow(blockRowArray2, store){
+  for(var j=0;j<blockRowArray2.length;++j){
+    var rowElement = blockRowArray2[j];
+    if(j<3){var rowNumber = 3;}
+    else{
+      if(j<6){var rowNumber = 4;}
+      else{var rowNumber = 5;}
+    }
+    store[rowNumber].push(rowElement);
+  }
+}
+
+function showMessage(message){
+    document.getElementById("message1").innerHTML = message;
+}
+
+function visualizeRows(){
+  if(computingRound <= 4){
+    var begin = 0, end = 3;
+  }
+  else if(computingRound > 4){
+    var begin = 3, end = 6;
+  }
+  for(var i=begin;i<end;++i){
+      var ausgabe = "ausgabe" + (i+1);
+      var row = rows[i];
+      document.getElementById(ausgabe).innerHTML = row;
+  }
+}
+
+
+
+// function findSecondBlock(){
+//   var array = [1,2,3,4,5,6,7,8,9], newArray = [];
+//   while(array.length != 0){
+//     var arrayIndex = randomChoice(array);
+//     var arrayElement = array[arrayIndex];
+//     var possibleElements = getPossibleElements(newArray);
+//     //alert("possible after compute: " + possibleElements);
+    
+//     if(possibleElements != undefined){
+//       var cleanedElements = cleanElements(possibleElements, newArray);
+//       for(i=0;i<cleanedElements.length;++i){
+//         var possible = cleanedElements[i];
+//         if(possible == arrayElement){
+//           newArray.push(arrayElement);
+//           array.splice(arrayIndex, 1);
+//         }
+//       }
+//     }
+//     else{
+//       findSecondBlock();
+//     }
+//   }
+//   return newArray;
+// }
+
+// function cleanElements(possibleElements, newArray){
+//   var cleanedElements = possibleElements;
+  
+//   if(newArray.length==5){
+//     cleanArray = [newArray[3], newArray[4]];
+//     for(i=0;i<rows.length;++i){
+//       var row = rows[i];
+//       var checkSame = row.concat(cleanArray);
+//       var uniqueCheckSame = getUniqueOrDouble(checkSame);
+//       if(uniqueCheckSame.length == 1){
+//         var cleanIndex = cleanedElements.indexOf(uniqueCheckSame);
+//         cleanedElements
+//       }
+//     }
+//   }
+//   return cleanedElements;
+// }
+
+
+// function getPossibleElements(newArray){
+//   if(newArray.length < 3){
+//     var possibleElements = checkAgainstNine(rows[0]);
+//   }
+//   else{
+//     var concatElements = concatAndUnique(newArray);
+//     var possibleElements = checkAgainstNine(concatElements);
+//   }
+//   //alert("possible: " + possibleElements);
+//   return possibleElements;
+// }
+
+// function concatAndUnique(newArray){
+//   if(newArray.length < 6){
+//     var concatElements = rows[1].concat(newArray);
+//     var uniqueElements = getUniqueOrDouble(concatElements);
+//   }
+//   else{
+//     var concatElements = rows[2].concat(newArray);
+//     var uniqueElements = getUniqueOrDouble(concatElements);
+//   }
+//   //alert("unique: " + uniqueElements);
+//   return uniqueElements;
+// }
 
 // function deleteFromCheckColumns(blockNumber){
 //   var columnBegin = 0; var columnEnd = 3;
@@ -456,18 +1001,3 @@ function pushFirstBlockRow(array, store){
 //     // } 
 //   //}
 // }
-
-function showMessage(message){
-    document.getElementById("message1").innerHTML = message;
-}
-
-function visualizeRows(){
-  if(computingRound <= 4){
-    var begin = 0, end = 3;
-  }
-  for(var i=begin;i<end;++i){
-      var ausgabe = "ausgabe" + (i+1);
-      var row = rows[i];
-      document.getElementById(ausgabe).innerHTML = row;
-  }
-}
