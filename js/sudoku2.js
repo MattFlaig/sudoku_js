@@ -32,8 +32,14 @@ function manageComputation(){
     computeSeventhBlock();
     computeEighthBlock();
     if(restart){
-      alert("restart!");
+      //alert("restart!");
       manageComputation();
+    }
+    else{
+      computeNinththBlock();
+      if(restart){
+        manageComputation();
+      }
     }
   }
 }
@@ -183,6 +189,25 @@ function computeEighthBlock(){
     //pushToColumns(seventhBlock, blockNumber);
 
     showMessage(messageEighth);//alert(secondBlock);
+    computingRound += 1;
+    //pushThirdBlockRow(seventhBlock, fillArray);
+    visualizeRows();
+  }
+}
+
+function computeNinththBlock(){
+  var blockNumber = 9;
+  var fillBlockColumns = fillWithMissingElements(6,7,8,columns);
+  var fillBlockRows = fillWithMissingElements(6,7,8,rows);
+  //alert("filled: " + fillBlock);
+  //var chosenColumns = chooseFromFilledElements(fillBlock, rows);
+  var ninthBlock = getCommonNumbers(fillBlockColumns, fillBlockRows);
+  if(restart==false){
+    blocks.push(ninthBlock);
+    var messageNinth = "Ninth Block successfully computed!";
+    pushToRows(ninthBlock, blockNumber);
+    //pushToColumns(seventhBlock, blockNumber);
+    showMessage(messageNinth);//alert(secondBlock);
     computingRound += 1;
     //pushThirdBlockRow(seventhBlock, fillArray);
     visualizeRows();
@@ -696,7 +721,7 @@ function getFilledLine(filledElement, checkLines){
 function transformToBlock(columnBlock){
   // var twoColumns = columnBlock[0].concat(columnBlock[1]);
   // var block = twoColumns.concat(columnBlock[2]);
-  alert(computingRound);
+  //alert(computingRound);
   var first = [], second = [], third = [];
   for(var i=0;i<columnBlock.length;++i){
     blockElement = columnBlock[i];
@@ -707,6 +732,50 @@ function transformToBlock(columnBlock){
   var transformedBlock = first.concat(second.concat(third));
   //alert(transformedBlock);
   return transformedBlock;
+}
+
+function getCommonNumbers(fillBlockColumns, fillBlockRows){
+  var newArray = [];
+  var allColumns = getSubarraysFromColumns(fillBlockColumns);
+  var allRows = getSubarraysFromRows(fillBlockRows);
+  for(var i=0;i<9;++i){
+    var concatArray = getConcatForLastBlock(allColumns, allRows, i);
+    var getDouble = getUniqueOrDouble(concatArray, doubled=1);
+    if(getDouble != undefined){
+      var field = getDouble[0];
+      newArray.push(field);
+    }
+    else {restart = true;}
+  }
+  if(newArray.length == 9){return newArray;}
+}
+
+function getSubarraysFromRows(fillBlockRows){
+  var row1 = [fillBlockRows[0], fillBlockRows[1], fillBlockRows[2]];
+  var row2 = [fillBlockRows[3], fillBlockRows[4], fillBlockRows[5]];
+  var row3 = [fillBlockRows[6], fillBlockRows[7], fillBlockRows[8]];
+  var allRows = [row1, row2, row3];
+  return allRows;
+}
+
+function getSubarraysFromColumns(fillBlockColumns){
+  var column1 = [fillBlockColumns[0], fillBlockColumns[1], fillBlockColumns[2]];
+  var column2 = [fillBlockColumns[3], fillBlockColumns[4], fillBlockColumns[5]];
+  var column3 = [fillBlockColumns[6], fillBlockColumns[7], fillBlockColumns[8]];
+  var allColumns = [column1, column2, column3];
+  return allColumns;
+}
+
+function getConcatForLastBlock(allColumns, allRows, i){
+  if(i<3){
+      var row = allRows[0], column = allColumns[i];
+  }
+  else {
+    if(i<6){var row = allRows[1], column = allColumns[i-3];}
+    else{var row = allRows[2], column = allColumns[i-6];}
+  }
+  var concatArray = row.concat(column);
+  return concatArray;
 }
 
 
