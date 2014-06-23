@@ -25,14 +25,12 @@ function manageComputation(){
   computeFifthBlock();
   computeSixthBlock();
   if(restart){
-    //alert("restart!");
     manageComputation();
   }
   else{
     computeSeventhBlock();
     computeEighthBlock();
     if(restart){
-      //alert("restart!");
       manageComputation();
     }
     else{
@@ -47,151 +45,63 @@ function manageComputation(){
 
 
 function computeFirstBlock(){
-  //alert("first block");
   prepareRows(fillArray);
   var blockNumber = 1;
-  //alert(checkRows); 
   var arrayOfNines = [1,2,3,4,5,6,7,8,9];
   var firstBlock = findRandomArray(arrayOfNines);
-  blocks.push(firstBlock);
-  //alert(checkRows); 
-  
-  var messageFirst = "First Block successfully computed!";
-  pushToRows(firstBlock, blockNumber);
-  //alert(checkRows); 
-  pushToColumns(firstBlock, blockNumber);
-  // deleteFromCheckRows(blockNumber);
-  // //alert(checkRows); 
-  // deleteFromCheckColumns(blockNumber);
-  showMessage(messageFirst);
-  computingRound += 1;
-  pushFirstBlockRow(firstBlock, fillArray);
-  visualizeRows();
+
+  manageBlocks(firstBlock, blockNumber);
 }
 
 function computeSecondBlock(){
   var blockNumber = 2;
   var secondBlock = getNextBlock(blockNumber);
-  blocks.push(secondBlock);
-   
-   var messageSecond = "Second Block successfully computed!";
-   pushToRows(secondBlock, blockNumber);
-   pushToColumns(secondBlock, blockNumber);
-   // deleteFromCheckRows(blockNumber);
-   // deleteFromCheckColumns(blockNumber);
-   showMessage(messageSecond);//alert(secondBlock);
-   computingRound += 1;
-   pushFirstBlockRow(secondBlock, fillArray);
-   visualizeRows();
+  manageBlocks(secondBlock, blockNumber);
 }
 
 function computeThirdBlock(){
   var blockNumber = 3;
   var fillBlock = fillWithMissingElements(0,1,2,rows);
   var thirdBlock = mixFilledRows(fillBlock);
-  blocks.push(thirdBlock);
-   
-   var messageThird = "Third Block successfully computed!";
-   pushToRows(thirdBlock, blockNumber);
-   pushToColumns(thirdBlock, blockNumber);
-   //deleteFromCheckRows(blockNumber);
-   //deleteFromCheckColumns(blockNumber);
-   showMessage(messageThird);//alert(secondBlock);
-   computingRound += 1;
-   pushFirstBlockRow(thirdBlock, fillArray);
-   visualizeRows();
+  manageBlocks(thirdBlock, blockNumber);
 }
 
 function computeFourthBlock(){
   prepareRows(fillArray);
   var blockNumber = 4;
   var fourthBlock = getBlockFromFirstThreeColumns();
-  blocks.push(fourthBlock);
-  
-  var messageFourth = "Fourth Block successfully computed!";
-  pushToRows(fourthBlock, blockNumber);
-  pushToColumns(fourthBlock, blockNumber);
-
-  showMessage(messageFourth);//alert(secondBlock);
-  computingRound += 1;
-  //alert("fourthBlock: " + fourthBlock);
-  pushSecondBlockRow(fourthBlock, fillArray);
-  visualizeRows();
+  manageBlocks(fourthBlock, blockNumber);
 }
 
 function computeFifthBlock(){
   var blockNumber = 5;
   var fifthBlock = getNextBlock(blockNumber);
-  blocks.push(fifthBlock);
-  
-  var messageFifth = "Fifth Block successfully computed!";
-  pushToRows(fifthBlock, blockNumber);
-  pushToColumns(fifthBlock, blockNumber);
-  //alert(columns);
-  showMessage(messageFifth);//alert(secondBlock);
-  computingRound += 1;
-  pushSecondBlockRow(fifthBlock, fillArray);
-  visualizeRows();
+  manageBlocks(fifthBlock, blockNumber);
 }
 
 function computeSixthBlock(){
-  //alert(columns[6]);
   var blockNumber = 6;
   var fillBlock = fillWithMissingElements(3,4,5, rows);
   var sixthBlock = chooseFromFilledElements(fillBlock, columns);
   if(restart==false){
-    
-    blocks.push(sixthBlock);
-   
-    var messageSixth = "Sixth Block successfully computed!";
-    pushToRows(sixthBlock, blockNumber);
-    pushToColumns(sixthBlock, blockNumber);
-    //deleteFromCheckRows(blockNumber);
-    //deleteFromCheckColumns(blockNumber);
-    showMessage(messageSixth);//alert(secondBlock);
-    computingRound += 1;
-    //pushSecondBlockRow(sixthBlock, fillArray);
-    visualizeRows();
+    manageBlocks(sixthBlock, blockNumber);
   }
 }
 
 function computeSeventhBlock(){
-  //alert(columns[6]);
   var blockNumber = 7;
   var fillBlock = fillWithMissingElements(0,1,2,columns);
   var seventhBlock = transformToBlock(fillBlock);
-  blocks.push(seventhBlock);
-   
-  var messageSeventh = "Seventh Block successfully computed!";
-  
-  pushToRows(seventhBlock, blockNumber);
-  //pushToColumns(seventhBlock, blockNumber);
-
-  showMessage(messageSeventh);//alert(secondBlock);
-  computingRound += 1;
-  //pushThirdBlockRow(seventhBlock, fillArray);
-  visualizeRows();
+  manageBlocks(seventhBlock, blockNumber);
 }
 
 function computeEighthBlock(){
-  //alert(columns[6]);
   var blockNumber = 8;
   var fillBlock = fillWithMissingElements(3,4,5,columns);
-  //alert("filled: " + fillBlock);
   var chosenColumns = chooseFromFilledElements(fillBlock, rows);
   if(restart==false){
     var eighthBlock = transformToBlock(chosenColumns);
-    blocks.push(eighthBlock);
-     
-    var messageEighth = "Eighth Block successfully computed!";
-    
-    pushToRows(eighthBlock, blockNumber);
-    //pushToColumns(seventhBlock, blockNumber);
-
-    showMessage(messageEighth);//alert(secondBlock);
-    computingRound += 1;
-    //pushThirdBlockRow(seventhBlock, fillArray);
-    visualizeRows();
+    manageBlocks(eighthBlock, blockNumber);
   }
 }
 
@@ -199,51 +109,34 @@ function computeNinththBlock(){
   var blockNumber = 9;
   var fillBlockColumns = fillWithMissingElements(6,7,8,columns);
   var fillBlockRows = fillWithMissingElements(6,7,8,rows);
-  //alert("filled: " + fillBlock);
-  //var chosenColumns = chooseFromFilledElements(fillBlock, rows);
   var ninthBlock = getCommonNumbers(fillBlockColumns, fillBlockRows);
   if(restart==false){
-    blocks.push(ninthBlock);
-    var messageNinth = "Ninth Block successfully computed!";
-    pushToRows(ninthBlock, blockNumber);
-    //pushToColumns(seventhBlock, blockNumber);
-    showMessage(messageNinth);//alert(secondBlock);
-    computingRound += 1;
-    //pushThirdBlockRow(seventhBlock, fillArray);
-    visualizeRows();
+    manageBlocks(ninthBlock, blockNumber);
+    var message = "All Blocks successfully computed!";
+    showMessage(message);
+  }
+}
+
+
+function manageBlocks(block, blockNumber){
+  blocks.push(block);
+  pushToRows(block, blockNumber);
+  pushToColumns(block, blockNumber);
+  computingRound += 1;
+  visualizeRows();
+  if(blockNumber<7){
+    if(blockNumber < 4){
+      pushBlockRow(block, fillArray, 0, 1, 2);
+    }
+    else{
+      pushBlockRow(block, fillArray, 3, 4, 5);
+    }
   }
 }
 
 
 
-function prepareRows(prepareArray){
-  for(var i=0;i<9;++i){
-    var emptyArray = [];
-    prepareArray.push(emptyArray);
-  }
-}
 
-function prepareColumns(){
-  for(var i=0;i<9;++i){
-    var emptyArray = [];
-    columns.push(emptyArray);
-  }
-}
-
-function findRandomArray(array){
-  //var array = [1,2,3,4,5,6,7,8,9];
-  //alert("random array!");
-  var newArray = [], emptyArray = [];
-  var deleteArray = array.concat(emptyArray);
-  while(deleteArray.length != 0){
-    var arrayIndex = Math.floor(Math.random() * deleteArray.length);
-    var arrayElement = deleteArray[arrayIndex];
-    newArray.push(arrayElement);
-    
-    deleteArray.splice(arrayIndex, 1);
-  }
-  return newArray;
-}
 
 function getNextBlock(blockNumber){
   //alert("get next block!");
@@ -546,12 +439,6 @@ function getThirdField(lines, first){
   return thirdField;
 }
 
-function getOneByRandom(array){
-  //alert("array: " + array);
-  var arrayIndex = Math.floor(Math.random() * array.length);
-  var arrayElement = array[arrayIndex];
-  return arrayElement;
-}
 
 function insertLastLine(array){
   var firstLine = [array[0], array[1], array[2]];
@@ -594,35 +481,6 @@ function getIndexForEndDoubled(lastFillLine){
   return insertIndex;
 }
 
-function findRandomIndex(endNumber){
-  var arrayIndex = Math.floor(Math.random() * parseInt(endNumber));
-  return arrayIndex;
-}
-
-function fillWithMissingElements(first, second, third, array){
-  var newBlock = [];
-  var firstLine = checkAgainstNine(array[first]);
-  var secondLine = checkAgainstNine(array[second]);
-  var thirdLine = checkAgainstNine(array[third]);
-  newBlock.push(firstLine[0],firstLine[1],firstLine[2]);
-  newBlock.push(secondLine[0],secondLine[1],secondLine[2]);
-  newBlock.push(thirdLine[0],thirdLine[1],thirdLine[2]);
-  return newBlock;
-}
-
-function mixFilledRows(block){
-  var newArray = [];
-  var first = [block[0],block[1],block[2]];
-  var second = [block[3],block[4],block[5]];
-  var third = [block[6],block[7],block[8]];
-  var filledRows = [first, second, third];
-  for(var i=0;i<filledRows.length;++i){
-    var row = filledRows[i];
-    var newRow = findRandomArray(row);
-    newArray = newArray.concat(newRow);
-  }
-  return newArray;
-}
 
 function getBlockFromFirstThreeColumns(){
   var block = [];
@@ -734,6 +592,9 @@ function transformToBlock(columnBlock){
   return transformedBlock;
 }
 
+
+
+/*9th BLOCK FUNCTIONS*/
 function getCommonNumbers(fillBlockColumns, fillBlockRows){
   var newArray = [];
   var allColumns = getSubarraysFromColumns(fillBlockColumns);
@@ -779,10 +640,75 @@ function getConcatForLastBlock(allColumns, allRows, i){
 }
 
 
-// function randomChoice(array){
-//   var arrayIndex = Math.floor(Math.random() * array.length);
-//   return arrayIndex;
-// }
+
+
+/*GENERAL FUNCTIONS*/
+
+function prepareRows(prepareArray){
+  for(var i=0;i<9;++i){
+    var emptyArray = [];
+    prepareArray.push(emptyArray);
+  }
+}
+
+function prepareColumns(){
+  for(var i=0;i<9;++i){
+    var emptyArray = [];
+    columns.push(emptyArray);
+  }
+}
+
+function getOneByRandom(array){
+  //alert("array: " + array);
+  var arrayIndex = Math.floor(Math.random() * array.length);
+  var arrayElement = array[arrayIndex];
+  return arrayElement;
+}
+
+function findRandomArray(array){
+  //var array = [1,2,3,4,5,6,7,8,9];
+  //alert("random array!");
+  var newArray = [], emptyArray = [];
+  var deleteArray = array.concat(emptyArray);
+  while(deleteArray.length != 0){
+    var arrayIndex = Math.floor(Math.random() * deleteArray.length);
+    var arrayElement = deleteArray[arrayIndex];
+    newArray.push(arrayElement);
+    
+    deleteArray.splice(arrayIndex, 1);
+  }
+  return newArray;
+}
+
+function findRandomIndex(endNumber){
+  var arrayIndex = Math.floor(Math.random() * parseInt(endNumber));
+  return arrayIndex;
+}
+
+function fillWithMissingElements(first, second, third, array){
+  var newBlock = [];
+  var firstLine = checkAgainstNine(array[first]);
+  var secondLine = checkAgainstNine(array[second]);
+  var thirdLine = checkAgainstNine(array[third]);
+  newBlock.push(firstLine[0],firstLine[1],firstLine[2]);
+  newBlock.push(secondLine[0],secondLine[1],secondLine[2]);
+  newBlock.push(thirdLine[0],thirdLine[1],thirdLine[2]);
+  return newBlock;
+}
+
+function mixFilledRows(block){
+  var newArray = [];
+  var first = [block[0],block[1],block[2]];
+  var second = [block[3],block[4],block[5]];
+  var third = [block[6],block[7],block[8]];
+  var filledRows = [first, second, third];
+  for(var i=0;i<filledRows.length;++i){
+    var row = filledRows[i];
+    var newRow = findRandomArray(row);
+    newArray = newArray.concat(newRow);
+  }
+  return newArray;
+}
 
 
 function getUniqueOrDouble(array, doubled) {
@@ -818,109 +744,59 @@ function checkAgainstNine(array){
   }
 
 function pushToColumns(array, blockNumber){
-  if(blockNumber == 1 || blockNumber == 4){
-    pushFirstBlockColumn(array);
+  if(blockNumber == 1 || blockNumber == 4 || blockNumber == 7){
+    pushBlockColumn(array, 0, 1, 2);
   }
-  else if(blockNumber == 2 || blockNumber == 5){
-    pushSecondBlockColumn(array);
+  else if(blockNumber == 2 || blockNumber == 5 || blockNumber == 8){
+    pushBlockColumn(array, 3, 4, 5);
   }
-  else if(blockNumber == 3 || blockNumber == 6){
-    pushThirdBlockColumn(array);
+  else if(blockNumber == 3 || blockNumber == 6 || blockNumber == 9){
+    pushBlockColumn(array, 6, 7, 8);
   }
   
 }
 
-function pushFirstBlockColumn(array){
+function pushBlockColumn(array, column1, column2, column3){
   for(var i=0;i<array.length;++i){
     var arrayElement = array[i];
-    if(i%3==0){var columnNumber = 0;}
+    if(i%3==0){var columnNumber = column1;}
     else{
-      if(i%3==1){var columnNumber = 1;}
-      else{var columnNumber = 2;}
+      if(i%3==1){var columnNumber = column2;}
+      else{var columnNumber = column3;}
     }
     columns[columnNumber].push(arrayElement);
   }
 }
 
-function pushSecondBlockColumn(array){
-  for(var i=0;i<array.length;++i){
-    var arrayElement = array[i];
-    if(i%3==0){var columnNumber = 3;}
-    else{
-      if(i%3==1){var columnNumber = 4;}
-      else{var columnNumber = 5;}
-    }
-    columns[columnNumber].push(arrayElement);
-  }
-}
 
-function pushThirdBlockColumn(array){
-  if(array != undefined){
-    for(var i=0;i<array.length;++i){
-      var arrayElement = array[i];
-      if(i%3==0){var columnNumber = 6;}
-      else{
-        if(i%3==1){var columnNumber = 7;}
-        else{var columnNumber = 8;}
-      }
-      columns[columnNumber].push(arrayElement);
-    }
-  }
-}
 
 function pushToRows(array, blockNumber){
   if(parseInt(blockNumber) <= 3 ){
-    pushFirstBlockRow(array, rows);
+    pushBlockRow(array, rows, 0, 1, 2);
   }
   else {
     if(parseInt(blockNumber) <= 6){
-      pushSecondBlockRow(array, rows);
+      pushBlockRow(array, rows, 3, 4, 5);
     }
     else{
-      pushThirdBlockRow(array, rows);
+      pushBlockRow(array, rows, 6, 7, 8);
     }
   }
   
 }
 
-function pushFirstBlockRow(blockRowArray1, store){
-  for(var j=0;j<blockRowArray1.length;++j){
-    var rowElement = blockRowArray1[j];
-    if(j<3){var rowNumber = 0;}
+function pushBlockRow(blockRowArray, store, row1, row2, row3){
+  for(var j=0;j<blockRowArray.length;++j){
+    var rowElement = blockRowArray[j];
+    if(j<3){var rowNumber = row1;}
     else{
-      if(j<6){var rowNumber = 1;}
-      else{var rowNumber = 2;}
+      if(j<6){var rowNumber = row2;}
+      else{var rowNumber = row3;}
     }
     store[rowNumber].push(rowElement);
   }
 }
 
-function pushSecondBlockRow(blockRowArray2, store){
-  //alert(blockRowArray2);
-  if(blockRowArray2 != undefined){
-    for(var j=0;j<blockRowArray2.length;++j){
-      var rowElement = blockRowArray2[j];
-      if(j<3){var rowNumber = 3;}
-      else{
-        if(j<6){var rowNumber = 4;}
-        else{var rowNumber = 5;}
-      }
-      store[rowNumber].push(rowElement);
-    }
-  }
-}
-
-function pushThirdBlockRow(blockRowArray3, store){
-  for(var j=0;j<blockRowArray3.length;++j){
-    var rowElement = blockRowArray3[j];
-    if(j<3){var rowNumber = 6;}
-    else{
-      if(j<6){var rowNumber = 7;}
-      else{var rowNumber = 8;}
-    }
-    store[rowNumber].push(rowElement);
-  }
-}
 
 function showMessage(message){
     document.getElementById("message1").innerHTML = message;
